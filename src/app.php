@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
+ require_once __DIR__ . '/../vendor/autoload.php';
 
 $app = new \Slim\Slim([
     'templates.path' => __DIR__.'/webapp/templates/',
