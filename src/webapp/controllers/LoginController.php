@@ -29,6 +29,11 @@ class LoginController extends Controller
         $pass = $request->post('pass');
 
         if (Auth::checkCredentials($user, $pass)) {
+        
+        	// Regenerate session id and clear session array
+        	session_regenerate_id();
+        	$_SESSION = array();
+        
             $_SESSION['user'] = $user;
 
             $isAdmin = Auth::user()->isAdmin();
