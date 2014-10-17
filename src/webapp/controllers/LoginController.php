@@ -18,37 +18,51 @@ class LoginController extends Controller
             $this->app->flash('info', 'You are already logged in as ' . $username);
             $this->app->redirect('/');
         } else {
-            $this->render('login.twig', []);
+        
+        	$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+        	
+            $this->render('login.twig', [
+            	'csrf_token' => $_SESSION['csrf_token']
+            ]);
         }
     }
 
     function login()
     {
-        $request = $this->app->request;
-        $user = $request->post('user');
-        $pass = $request->post('pass');
-
-        if (Auth::checkCredentials($user, $pass)) {
-        
-        	// Regenerate session id and clear session array
-        	session_regenerate_id();
-        	$_SESSION = array();
-        
-            $_SESSION['user'] = $user;
-
-            $isAdmin = Auth::user()->isAdmin();
-
-            if ($isAdmin) {
-                setcookie("isadmin", "yes");
-            } else {
-                setcookie("isadmin", "no");
-            }
-
-            $this->app->flash('info', "You are now successfully logged in as $user.");
-            $this->app->redirect('/');
-        } else {
-            $this->app->flashNow('error', 'Incorrect user/pass combination.');
-            $this->render('login.twig', []);
+    
+    	if ($this->app->request->post('token') !==  null) {
+    
+	        $request = $this->app->request;
+	        $user = $request->post('user');
+	        $pass = $request->post('pass');
+	        $token = $request->post('token');
+	       
+			if ($token == $_SESSION['csrf_token']) {
+	
+		        if (Auth::checkCredentials($user, $pass)) {
+		        
+		        	// Regenerate session id and clear session array
+		        	session_regenerate_id();
+		        	$_SESSION = array();
+		        
+		            $_SESSION['user'] = $user;
+		
+		            $isAdmin = Auth::user()->isAdmin();
+		
+		            if ($isAdmin) {
+		                setcookie("isadmin", "yes");
+		            } else {
+		                setcookie("isadmin", "no");
+		            }
+		
+		            $this->app->flash('info', "You are now successfully logged in as $user.");
+		            $this->app->redirect('/');
+		        } else {
+		            $this->app->flashNow('error', 'Incorrect user/pass combination.');
+		            $this->render('login.twig', []);
+		        }
+	        }
         }
+        $this->app->redirect('/');
     }
 }
