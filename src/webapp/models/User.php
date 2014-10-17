@@ -12,7 +12,7 @@ class User
 
     const MIN_USER_LENGTH = 3;    
     const MAX_USER_LENGTH = 15;
-    const MIN_PASSWORD_LENGTH = 6;
+    const MIN_PASSWORD_LENGTH = 8;
 
     protected $id = null;
     protected $user;
@@ -166,12 +166,23 @@ class User
             array_push($validationErrors, "Username too short. Min length is " . self::MIN_USER_LENGTH);
         }
 
+        $uppercase = preg_match('@[A-Z]@', $pass);
+        $number    = preg_match('@[0-9]@', $pass);
+
         if (strlen($user->user) > self::MAX_USER_LENGTH) {
             array_push($validationErrors, "Username too long. Max length is " . self::MAX_USER_LENGTH);
         }
 
         if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
             array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
+        }
+
+        if (!$uppercase) {
+            array_push($validationErrors, "Password must contain at least one uppcase letter!");
+        }
+
+        if (!$number) {
+            array_push($validationErrors, "Password must contain at least one number!");
         }
 
         if (preg_match('/^[A-Za-z0-9_]+$/', $user->user) === 0) {
