@@ -14,6 +14,9 @@ class AdminController extends Controller
 
     function index()
     {
+    	$_SESSION["csrf_token"] = md5(uniqid(mt_rand(), true));
+        $crsf_token = $_SESSION["csrf_token"];
+    
         if (Auth::guest()) {
             $this->app->flash('info', "You must be logged in to view the admin page.");
             $this->app->redirect('/');
@@ -25,13 +28,17 @@ class AdminController extends Controller
         }
 
         $variables = [
-            'users' => User::all()
+            'users' => User::all(),
+            'csrf_token' => $crsf_token
         ];
         $this->render('admin.twig', $variables);
     }
 
     function delete($username)
     {
+    	$request = $this->app->request;
+        $token = $request->get('csrf_token');
+        
     	
     	if (Auth::guest() || !Auth::isAdmin()) {
 	    	$this->app->flash('info', "You must be administrator to view the admin page.");
@@ -39,13 +46,20 @@ class AdminController extends Controller
     	}
     	
     	else if (Auth::isAdmin()) {
-	        if (User::deleteByUsername($username) === 1) {
-	            $this->app->flash('info', "Sucessfully deleted '$username'");
-	        } else {
-	            $this->app->flash('info', "An error ocurred. Unable to delete user '$username'.");
-	        }
+    	
+    		// Only performs the deletion if the admin pushed the delete button
+    		if ($token == $_SESSION["csrf_token"]) {
+    		
+	    		if (User::deleteByUsername($username) === 1) {
+	            	$this->app->flash('info', "Sucessfully deleted '$username'");
+				} else {
+	            	$this->app->flash('info', "An error ocurred. Unable to delete user '$username'.");
+				}
+    		}
 	
 	        $this->app->redirect('/admin');
         }
+ 
+        $this->app->redirect('/admin');
     }
 }

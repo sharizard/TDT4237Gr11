@@ -14,7 +14,12 @@
         <tr>
             <td>{{ user.id|raw }}</td>
             <td><a href="/user/{{ user.username|raw }}">{{ user.username|raw }}</a></td>
-            <td><a href="/admin/delete/{{ user.username|raw }}">Delete this user</a></td>
+            <td>
+            	<form action="/admin/delete/{{ user.username|raw }}" method="GET">
+            		<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+					<input type="submit" name="submit" value="Delete this user">
+            	</form>
+            </td>
         </tr>
     {% endfor %}
     </table>
