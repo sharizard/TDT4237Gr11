@@ -25,9 +25,7 @@ class Auth
             return false;
         }
 
-        $salted_pass = $salt . $password;
-
-        return Hash::check($salted_pass, $user->getPasswordHash());
+        return Hash::check($password, $salt, $user->getPasswordHash());
     }
 
     /**

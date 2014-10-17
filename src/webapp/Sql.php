@@ -33,13 +33,13 @@ class Sql
     static function insertDummyUsers() {
         $hash1 = Hash::make(bin2hex(openssl_random_pseudo_bytes(2)));
         $salt1 = Hash::createSalt();
-        $pass1 = Hash::make($salt1 . $hash1);
+        $pass1 = Hash::make($hash1, $salt1);
         $pass2 = 'bobdylan';
         $salt2 = Hash::createSalt();
-        $salted_pass2 = Hash::make($salt2 . $pass2);
+        $salted_pass2 = Hash::make($pass2, $salt2);
         $pass3 = 'liverpool';
         $salt3 = Hash::createSalt();
-        $salted_pass3 = Hash::make($salt3 . $pass3);
+        $salted_pass3 = Hash::make($pass3, $salt3);
 
         $q1 = "INSERT INTO users(user, salt, pass, isadmin) VALUES ('admin', '$salt1', '$pass1', 1)";
         $q2 = "INSERT INTO users(user, salt, pass, isadmin) VALUES ('bob', '$salt2', '$salted_pass2', 1)";

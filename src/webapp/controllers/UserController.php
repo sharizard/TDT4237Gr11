@@ -31,7 +31,7 @@ class UserController extends Controller
         $pass = $request->post('pass');
 
         $salt = Hash::createSalt();
-        $hashed_password = Hash::make($salt . $pass);
+        $hashed_password = Hash::make($pass, $salt);
 
         $user = User::makeEmpty();
         $user->setUsername($username);

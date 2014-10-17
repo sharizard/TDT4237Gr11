@@ -4,13 +4,16 @@ namespace tdt4237\webapp;
 
 class Hash
 {
+    const ITERATIONS = 1000;
+    const LENGTH = 20;
+
     function __construct()
     {
     }
 
-    static function make($plaintext)
+    static function make($plaintext, $salt)
     {
-        return hash('sha512', $plaintext);
+        return hash_pbkdf2('sha512', $plaintext, $salt, self::ITERATIONS, self::LENGTH);
     }
 
     static function createSalt()
@@ -19,8 +22,8 @@ class Hash
         return $salt;
     }
 
-    static function check($plaintext, $hash)
+    static function check($plaintext, $salt, $hash)
     {
-        return self::make($plaintext) === $hash;
+        return self::make($plaintext, $salt) === $hash;
     }
 }
