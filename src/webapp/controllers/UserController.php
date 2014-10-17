@@ -30,11 +30,13 @@ class UserController extends Controller
         $username = $request->post('user');
         $pass = $request->post('pass');
 
-        $hashed = Hash::make($pass);
+        $salt = Hash::createSalt();
+        $hashed_password = Hash::make($salt . $pass);
 
         $user = User::makeEmpty();
         $user->setUsername($username);
-        $user->setHash($hashed);
+        $user->setSalt($salt);
+        $user->setHash($hashed_password);
 
         $validationErrors = User::validate($user);
 
@@ -44,7 +46,7 @@ class UserController extends Controller
             $this->render('newUserForm.twig', ['username' => $username]);
         } else {
             $user->save();
-            $this->app->flash('info', 'Thanks for creating a user. Now log in.');
+            $this->app->flash('info', 'Thanks for creating a user. Now log in.' . $salt . ' and ' . $hashed_password);
             $this->app->redirect('/login');
         }
     }

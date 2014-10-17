@@ -6,16 +6,18 @@ use tdt4237\webapp\Hash;
 
 class User
 {
-    const INSERT_QUERY = "INSERT INTO users(user, pass, email, age, bio, isadmin) VALUES('%s', '%s', '%s' , '%s' , '%s', '%s')";
+    const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s')";
     const UPDATE_QUERY = "UPDATE users SET email='%s', age='%s', bio='%s', isadmin='%s' WHERE id='%s'";
     const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
 
     const MIN_USER_LENGTH = 3;    
     const MAX_USER_LENGTH = 15;
+    const MIN_PASSWORD_LENGTH = 6;
 
 
     protected $id = null;
     protected $user;
+    protected $salt;
     protected $pass;
     protected $email;
     protected $bio = 'Bio is empty.';
@@ -28,11 +30,12 @@ class User
     {
     }
 
-    static function make($id, $username, $hash, $email, $bio, $age, $isAdmin)
+    static function make($id, $username, $salt, $hash, $email, $bio, $age, $isAdmin)
     {
         $user = new User();
         $user->id = $id;
         $user->user = $username;
+        $user->salt = $salt;
         $user->pass = $hash;
         $user->email = $email;
         $user->bio = $bio;
@@ -55,6 +58,7 @@ class User
         if ($this->id === null) {
             $query = sprintf(self::INSERT_QUERY,
                 $this->user,
+                $this->salt,
                 $this->pass,
                 $this->email,
                 $this->age,
@@ -87,6 +91,10 @@ class User
     function getPasswordHash()
     {
         return $this->pass;
+    }
+
+    function getSalt() {
+        return $this->salt;
     }
 
     function getEmail()
@@ -122,6 +130,11 @@ class User
     function setHash($hash)
     {
         $this->pass = $hash;
+    }
+
+    function setSalt($salt) 
+    {
+        $this->salt = $salt;
     }
 
     function setEmail($email)
@@ -160,6 +173,9 @@ class User
         if (preg_match('/^[A-Za-z0-9_]+$/', $user->user) === 0) {
             array_push($validationErrors, 'Username can only contain letters and numbers');
         }
+        if (strlen($user->pass) < self::MIN_PASSWORD_LENGTH) {
+            array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
+        }
 
         return $validationErrors;
     }
@@ -194,6 +210,23 @@ class User
         return User::makeFromSql($row);
     }
 
+    /**
+    * Find the users salt in db by username
+    *
+    * @param string $username
+    * @return the users salt
+    */
+    static function findSaltByUser($username) {
+        $query = sprintf(self::FIND_BY_NAME, $username);
+        $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
+        $row = $result->fetch();
+
+        if($row == false) {
+            return null;
+        }
+        return $row['salt'];
+    }
+
     static function deleteByUsername($username)
     {
         $query = "DELETE FROM users WHERE user='$username' ";
@@ -220,6 +253,7 @@ class User
         return User::make(
             $row['id'],
             $row['user'],
+            $row['salt'],
             $row['pass'],
             $row['email'],
             $row['bio'],

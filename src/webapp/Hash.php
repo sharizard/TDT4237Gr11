@@ -13,6 +13,12 @@ class Hash
         return hash('sha512', $plaintext);
     }
 
+    static function createSalt()
+    {
+        $salt = md5(uniqid(mt_rand(), TRUE));
+        return $salt;
+    }
+
     static function check($plaintext, $hash)
     {
         return self::make($plaintext) === $hash;
