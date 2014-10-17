@@ -14,7 +14,6 @@ class User
     const MAX_USER_LENGTH = 15;
     const MIN_PASSWORD_LENGTH = 6;
 
-
     protected $id = null;
     protected $user;
     protected $salt;
@@ -159,22 +158,24 @@ class User
      * @param User $user
      * @return array An array of strings of validation errors
      */
-    static function validate(User $user)
+    static function validate(User $user, $pass)
     {
         $validationErrors = [];
 
         if (strlen($user->user) < self::MIN_USER_LENGTH) {
             array_push($validationErrors, "Username too short. Min length is " . self::MIN_USER_LENGTH);
         }
+
         if (strlen($user->user) > self::MAX_USER_LENGTH) {
             array_push($validationErrors, "Username too long. Max length is " . self::MAX_USER_LENGTH);
         }
 
+        if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
+            array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
+        }
+
         if (preg_match('/^[A-Za-z0-9_]+$/', $user->user) === 0) {
             array_push($validationErrors, 'Username can only contain letters and numbers');
-        }
-        if (strlen($user->pass) < self::MIN_PASSWORD_LENGTH) {
-            array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
         }
 
         return $validationErrors;
