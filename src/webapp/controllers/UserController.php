@@ -119,6 +119,8 @@ class UserController extends Controller {
                 $this->app->flashNow('info', 'Your profile was successfully saved.');
                 $token = $request->post('csrf_token');
 
+                $token = $request->post('csrf_token');
+
                 if ($token == $_SESSION['csrf_token']) {
 
                     $user->setEmail($email);
@@ -142,4 +144,5 @@ class UserController extends Controller {
             ]);
         }
     }
+
 }

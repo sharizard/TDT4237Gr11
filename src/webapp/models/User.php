@@ -5,6 +5,7 @@ namespace tdt4237\webapp\models;
 use tdt4237\webapp\models\Avatar;
 use tdt4237\webapp\Hash;
 
+
 class User extends Avatar
 {  
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
@@ -14,7 +15,7 @@ class User extends Avatar
 
     const MIN_USER_LENGTH = 3;    
     const MAX_USER_LENGTH = 15;
-    
+
     const MIN_PASSWORD_LENGTH = 8;
 
     protected $id = null;
@@ -87,6 +88,9 @@ class User extends Avatar
             
             $query = self::$app->db->prepare(self::UPDATE_QUERY);
             $result = $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
+
+            $query = self::$app->db->prepare(self::UPDATE_QUERY);
+            $result = $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
         }
         //return $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
         //return self::$app->db->exec($query);
