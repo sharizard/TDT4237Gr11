@@ -18,10 +18,10 @@
         </tr>
             <tr>
             <td>{{ user.id|raw }}</td>
-            <td>{{ user.username|escape('js') }}</td>
-            <td>{{ user.email|escape('js') }}</td>
-            <td>{{ user.bio|escape('js') }}</td>
-            <td>{{ user.age|escape('js') }}</td>
+            <td>{{ user.username|escape }}</td>
+            <td>{{ user.email|escape }}</td>
+            <td>{{ user.bio|escape }}</td>
+            <td>{{ user.age|escape }}</td>
         </tr>
     </table>
 {% else %}
