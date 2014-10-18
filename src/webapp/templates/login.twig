@@ -5,7 +5,8 @@
 <h2>Login</h2>
 
 {{ flash.error|raw }} <br />
-
+{#<a href="recover">Forgot your password?</a> <br>#}
+<a href="{{ urlFor('recover') }}">Forgot your password?</a> <br />
 <form action="" method="POST">
 
 <label>Username: </label>

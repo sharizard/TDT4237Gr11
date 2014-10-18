@@ -21,6 +21,28 @@ class LoginController extends Controller
             $this->render('login.twig', []);
         }
     }
+    
+    function recover()
+    {
+            $this->render('recover.twig', []);
+            
+            
+            if ($this->app->request->isPost()) {
+            $request = $this->app->request;
+            $username = $request->post('username');
+            $email = $request->post('email');
+
+            if ($email == NULL){
+                
+            }
+            else {
+                $q = $this->app->db->prepare("SELECT * FROM users WHERE user=?");
+                $q->execute(array($username));
+                $row = $q->setFetchMode(\PDO::FETCH_ASSOC);
+                echo $row;
+            }
+        }
+    }
 
     function login()
     {

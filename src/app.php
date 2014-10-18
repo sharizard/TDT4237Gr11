@@ -31,6 +31,10 @@ $app->get('/', $ns . 'IndexController:index');
 $app->get('/login', $ns . 'LoginController:index');
 $app->post('/login', $ns . 'LoginController:login');
 
+// Recover password form
+$app->get('/login/recover', $ns . 'LoginController:recover')->name('recover');
+$app->post('/login/recover', $ns . 'LoginController:recover');
+
 // New user
 $app->get('/user/new', $ns . 'UserController:index')->name('newuser');
 $app->post('/user/new', $ns . 'UserController:create');
