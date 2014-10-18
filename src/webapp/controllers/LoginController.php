@@ -19,8 +19,8 @@ class LoginController extends Controller
             $this->app->redirect('/');
         } else {
         
+        	// Create token and pass it to the rendered template
         	$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
-        	
             $this->render('login.twig', [
             	'csrf_token' => $_SESSION['csrf_token']
             ]);
@@ -59,10 +59,14 @@ class LoginController extends Controller
 		            $this->app->redirect('/');
 		        } else {
 		            $this->app->flashNow('error', 'Incorrect user/pass combination.');
-		            $this->render('login.twig', []);
+		            
+		            // Create token and pass it to the rendered template
+		            $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+		            $this->render('login.twig', [
+		            	'csrf_token' => $_SESSION['csrf_token']
+		            ]);
 		        }
 	        }
         }
-        $this->app->redirect('/');
     }
 }
