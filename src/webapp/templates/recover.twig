@@ -1,12 +1,24 @@
 {% extends 'base.twig' %}
 
 {% block content %}
-    <form action="" method="POST">
-
-<label>Enter your username: </label>
-<input type="text" name="username"> <br />
-<label>Enter your email: </label>
-<input type="text" name="email"> <br />
-<input type="submit" name="Submit" value="Submit">
-</form>
+    
+    {% if code == null %}
+        <form action='' method='POST'>
+            <label>Enter your username: </label>
+            <input type='text' name='username'> <br />
+            <label>Enter your email: </label>
+            <input type='text' name='email'> <br />
+            <input type='submit' name='Submit' value='Submit'>
+        </form>
+    {% else %}
+        <form action='' method='POST'>
+            <label>Enter a new password: </label>
+            <input type='password' name='newpass'> <br />
+            <label>Re-enter your password: </label>
+            <input type='password' name='newpass1'> <br />
+            <input type='hidden' name='username' value='{{username}}'>
+            <input type='submit' name='Submit' value='Update Password'>
+        </form>
+    {% endif %}
+    
 {% endblock %}
