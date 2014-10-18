@@ -12,6 +12,8 @@ $view->parserExtensions = array(
     new \Slim\Views\TwigExtension(),
 );
 
+    $app->mail = new PHPMailer;
+
 try {
     // Create (connect to) SQLite database in file
     $app->db = new PDO('sqlite:app.db');
@@ -30,6 +32,13 @@ $app->get('/', $ns . 'IndexController:index');
 // Login form
 $app->get('/login', $ns . 'LoginController:index');
 $app->post('/login', $ns . 'LoginController:login');
+
+// Recover password form
+$app->get('/login/recover', $ns . 'LoginController:recover')->name('recover');
+$app->post('/login/recover', $ns . 'LoginController:recover');
+
+// Set password
+$app->get('/login/setpass', $ns . 'LoginController:setpassword')->name('setpassword');
 
 // New user
 $app->get('/user/new', $ns . 'UserController:index')->name('newuser');
