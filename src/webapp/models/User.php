@@ -5,7 +5,6 @@ namespace tdt4237\webapp\models;
 use tdt4237\webapp\models\Avatar;
 use tdt4237\webapp\Hash;
 
-
 class User extends Avatar
 {  
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
