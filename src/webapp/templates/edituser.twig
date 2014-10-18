@@ -4,7 +4,9 @@
 
     <h2>Edit profile</h2>
 
-    <form action="" method="POST">
+    <img src="{{ user.avatar|raw }}" alt="" width="400px" />
+    
+    <form enctype="multipart/form-data" method="POST" action="">
         <div id="flasherror">{{ flash.error|raw }}</div>
 
         <label>email:</label>
@@ -16,6 +18,9 @@
         <label>Age:</label>
         <input type="text" name="age" value="{{ user.age|raw }}"> <br />
 
+        <label>Avatar:</label>
+        <input type="file" name="avatar"> <br />
+        
         <input type="submit" name="submit" value="Save profile">
     </form>
 {% endblock %}

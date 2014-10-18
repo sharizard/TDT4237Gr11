@@ -2,24 +2,25 @@
 
 namespace tdt4237\webapp\models;
 
+use tdt4237\webapp\models\Avatar;
 use tdt4237\webapp\Hash;
 
-class User
-{
-    const INSERT_QUERY = "INSERT INTO users(user, pass, email, age, bio, isadmin) VALUES('%s', '%s', '%s' , '%s' , '%s', '%s')";
-    const UPDATE_QUERY = "UPDATE users SET email='%s', age='%s', bio='%s', isadmin='%s' WHERE id='%s'";
+class User extends Avatar
+{  
+    const INSERT_QUERY = "INSERT INTO users(user, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
+    const UPDATE_QUERY = "UPDATE users SET email='%s', age='%s', bio='%s', avatar='%s', isadmin='%s' WHERE id='%s'";
     const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
 
     const MIN_USER_LENGTH = 3;    
     const MAX_USER_LENGTH = 15;
-
-
+        
     protected $id = null;
     protected $user;
     protected $pass;
     protected $email;
     protected $bio = 'Bio is empty.';
     protected $age;
+
     protected $isAdmin = 0;
 
     static $app;
@@ -28,7 +29,7 @@ class User
     {
     }
 
-    static function make($id, $username, $hash, $email, $bio, $age, $isAdmin)
+    static function make($id, $username, $hash, $email, $bio, $age, $avatar, $isAdmin)
     {
         $user = new User();
         $user->id = $id;
@@ -37,6 +38,8 @@ class User
         $user->email = $email;
         $user->bio = $bio;
         $user->age = $age;
+        $user->avatar = $avatar;
+        
         $user->isAdmin = $isAdmin;
 
         return $user;
@@ -59,6 +62,8 @@ class User
                 $this->email,
                 $this->age,
                 $this->bio,
+                $this->avatar,
+                    
                 $this->isAdmin
             );
         } else {
@@ -66,6 +71,8 @@ class User
                 $this->email,
                 $this->age,
                 $this->bio,
+                $this->avatar,
+                    
                 $this->isAdmin,
                 $this->id
             );
@@ -103,7 +110,7 @@ class User
     {
         return $this->age;
     }
-
+    
     function isAdmin()
     {
         return $this->isAdmin === "1";
@@ -138,7 +145,7 @@ class User
     {
         $this->age = $age;
     }
-
+   
     /**
      * The caller of this function can check the length of the returned 
      * array. If array length is 0, then all checks passed.
@@ -224,6 +231,7 @@ class User
             $row['email'],
             $row['bio'],
             $row['age'],
+            $row['avatar'],
             $row['isadmin']
         );
     }

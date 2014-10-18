@@ -8,6 +8,9 @@
 {{ flash.error|raw }} <br />
 
 {% if user %}
+
+    <img src="{{ user.avatar|raw }}" alt="" width="400px" />
+
     <table>
         <tr>
             <th>Id</th>
@@ -17,9 +20,10 @@
             <th>Bio</th>
             <th>Age</th>
         </tr>
-            <tr>
+        <tr>
             <td>{{ user.id|raw }}</td>
             <td>{{ user.username|raw }}</td>
+            <td>-</td>
             <td>{{ user.email|raw }}</td>
             <td>{{ user.bio|raw }}</td>
             <td>{{ user.age|raw }}</td>
