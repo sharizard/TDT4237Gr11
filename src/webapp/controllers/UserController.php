@@ -16,7 +16,11 @@ class UserController extends Controller
     function index()
     {
         if (Auth::guest()) {
-            $this->render('newUserForm.twig', []);
+        	// Create token and pass it to the rendered template
+        	$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+            $this->render('newUserForm.twig', [
+            	'csrf_token' => $_SESSION['csrf_token']
+            ]);
         } else {
             $username = Auth::user()->getUserName();
             $this->app->flash('info', 'You are already logged in as ' . $username);
@@ -26,28 +30,43 @@ class UserController extends Controller
 
     function create()
     {
-        $request = $this->app->request;
-        $username = $request->post('user');
-        $pass = $request->post('pass');
-
-        $salt = Hash::createSalt();
-        $hashed_password = Hash::make($pass, $salt);
-
-        $user = User::makeEmpty();
-        $user->setUsername($username);
-        $user->setSalt($salt);
-        $user->setHash($hashed_password);
-
-        $validationErrors = User::validate($user, $pass);
-
-        if (sizeof($validationErrors) > 0) {
-            $errors = join("<br>\n", $validationErrors);
-            $this->app->flashNow('error', $errors);
-            $this->render('newUserForm.twig', ['username' => $username]);
+    	if ($this->app->request->post('csrf_token') !==  null) {
+    
+	        $request = $this->app->request;
+	        $username = $request->post('user');
+	        $pass = $request->post('pass');
+	        $token = $request->post('csrf_token');
+	        
+	        if ($token == $_SESSION['csrf_token']) {
+	        
+		        $salt = Hash::createSalt();
+		        $hashed_password = Hash::make($pass, $salt);
+		
+		        $user = User::makeEmpty();
+		        $user->setUsername($username);
+		        $user->setSalt($salt);
+		        $user->setHash($hashed_password);
+		
+		        $validationErrors = User::validate($user, $pass);
+		
+		        if (sizeof($validationErrors) > 0) {
+		            $errors = join("<br>\n", $validationErrors);
+		            $this->app->flashNow('error', $errors);
+		            
+		            // Create token and pass it to the rendered template
+					$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+		            $this->render('newUserForm.twig', [
+		            	'username' => $username,
+		            	'csrf_token' => $_SESSION['csrf_token']
+		            ]);
+		        } else {
+		            $user->save();
+		            $this->app->flash('info', 'Thanks for creating a user. Now log in.');
+		            $this->app->redirect('/login');
+		        }
+	        }
         } else {
-            $user->save();
-            $this->app->flash('info', 'Thanks for creating a user. Now log in.');
-            $this->app->redirect('/login');
+	        $this->app->redirect('/user/new');
         }
     }
 
@@ -88,23 +107,33 @@ class UserController extends Controller
         }
 
         if ($this->app->request->isPost()) {
+        
             $request = $this->app->request;
             $email = $request->post('email');
             $bio = $request->post('bio');
             $age = $request->post('age');
+            $token = $request->post('csrf_token');
+            
+            if ($token == $_SESSION['csrf_token']) {
 
-            $user->setEmail($email);
-            $user->setBio($bio);
-            $user->setAge($age);
-
-            if (! User::validateAge($user)) {
-                $this->app->flashNow('error', 'Age must be between 0 and 150.');
-            } else {
-                $user->save();
-                $this->app->flashNow('info', 'Your profile was successfully saved.');
+	            $user->setEmail($email);
+	            $user->setBio($bio);
+	            $user->setAge($age);
+	
+	            if (! User::validateAge($user)) {
+	                $this->app->flashNow('error', 'Age must be between 0 and 150.');
+	            } else {
+	                $user->save();
+	                $this->app->flashNow('info', 'Your profile was successfully saved.');
+	            }
             }
         }
-
-        $this->render('edituser.twig', ['user' => $user]);
+		
+		// Create token and pass it to the rendered template
+        $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+        $this->render('edituser.twig', [
+        	'user' => $user,
+        	'csrf_token' => $_SESSION['csrf_token']
+        ]);
     }
 }

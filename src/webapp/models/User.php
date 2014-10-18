@@ -8,7 +8,7 @@ class User
 {
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s')";
     const UPDATE_QUERY = "UPDATE users SET email=?, age=?, bio=?, isAdmin=? WHERE id=?";
-//    const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
+    //const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
 
     const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
 
@@ -66,10 +66,14 @@ class User
                 $this->bio,
                 $this->isAdmin
             );
+            return self::$app->db->exec($query);
         } else {
-            $q = self::$app->db->prepare(self::UPDATE_QUERY);
+            $query = self::$app->db->prepare(self::UPDATE_QUERY);
+            $result = $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
         }
-          return $q->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
+        //return $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
+        //return self::$app->db->exec($query);
+        return $result;
     }
 
     function getId()
