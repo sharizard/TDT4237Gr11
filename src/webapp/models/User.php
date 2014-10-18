@@ -7,7 +7,8 @@ use tdt4237\webapp\Hash;
 class User
 {
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s')";
-    const UPDATE_QUERY = "UPDATE users SET email='%s', age='%s', bio='%s', isadmin='%s' WHERE id='%s'";
+    const UPDATE_QUERY = "UPDATE users SET email=?, age=?, bio=?, isAdmin=? WHERE id=?";
+
     const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
 
     const MIN_USER_LENGTH = 3;    
@@ -65,16 +66,9 @@ class User
                 $this->isAdmin
             );
         } else {
-            $query = sprintf(self::UPDATE_QUERY,
-                $this->email,
-                $this->age,
-                $this->bio,
-                $this->isAdmin,
-                $this->id
-            );
+            $q = self::$app->db->prepare(self::UPDATE_QUERY);
         }
-
-        return self::$app->db->exec($query);
+          return $q->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
     }
 
     function getId()
