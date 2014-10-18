@@ -22,11 +22,18 @@
         </tr>
         <tr>
             <td>{{ user.id|raw }}</td>
+<<<<<<< HEAD
             <td>{{ user.username|raw }}</td>
             <td>-</td>
             <td>{{ user.email|raw }}</td>
             <td>{{ user.bio|raw }}</td>
             <td>{{ user.age|raw }}</td>
+=======
+            <td>{{ user.username|escape }}</td>
+            <td>{{ user.email|escape }}</td>
+            <td>{{ user.bio|escape }}</td>
+            <td>{{ user.age|escape }}</td>
+>>>>>>> 8f97e0f184388f41b143e629715dd7a299909178
         </tr>
     </table>
 {% else %}

@@ -16,7 +16,7 @@ class Sql
      * Create tables.
      */
     static function up() {
-        $q1 = "CREATE TABLE users (id INTEGER PRIMARY KEY, user VARCHAR(50), pass VARCHAR(50), email varchar(50), age varchar(50), bio varhar(50), avatar varchar(100), isadmin INTEGER);";
+        $q1 = "CREATE TABLE users (id INTEGER PRIMARY KEY, user VARCHAR(50), salt VARCHAR(50), pass VARCHAR(50), email varchar(50), age varchar(50), bio varhar(50), avatar varchar(100), isadmin INTEGER);";
         $q4 = "CREATE TABLE movies (id INTEGER PRIMARY KEY, name VARVHAR(50), imageurl VARCHAR(100) );";
         $q5 = "CREATE TABLE moviereviews (id INTEGER PRIMARY KEY, movieid INTEGER, author VARVHAR(50), text VARCHAR(500) );";
 
@@ -31,13 +31,18 @@ class Sql
     }
 
     static function insertDummyUsers() {
-        $hash1 = Hash::make(bin2hex(openssl_random_pseudo_bytes(2)));
-        $hash2 = Hash::make('bobdylan');
-        $hash3 = Hash::make('liverpool');
+        $salt1 = Hash::createSalt();
+        $pass1 = Hash::make(bin2hex(openssl_random_pseudo_bytes(2)), $salt1);
+        $pass2 = 'bobdylan';
+        $salt2 = Hash::createSalt();
+        $salted_pass2 = Hash::make($pass2, $salt2);
+        $pass3 = 'liverpool';
+        $salt3 = Hash::createSalt();
+        $salted_pass3 = Hash::make($pass3, $salt3);
 
-        $q1 = "INSERT INTO users(user, pass, isadmin) VALUES ('admin', '$hash1', 1)";
-        $q2 = "INSERT INTO users(user, pass) VALUES ('bob', '$hash2')";
-        $q3 = "INSERT INTO users(user, pass) VALUES ('mike', '$hash3')";
+        $q1 = "INSERT INTO users(user, salt, pass, isadmin) VALUES ('admin', '$salt1', '$pass1', 1)";
+        $q2 = "INSERT INTO users(user, salt, pass, isadmin) VALUES ('bob', '$salt2', '$salted_pass2', 1)";
+        $q3 = "INSERT INTO users(user, salt, pass) VALUES ('mike', '$salt3', '$salted_pass3')";
 
         self::$pdo->exec($q1);
         self::$pdo->exec($q2);

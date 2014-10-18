@@ -39,7 +39,7 @@
             </div>
 
             <div id="content">
-                <div id="flashinfo">{{ flash.info|raw }}</div>
+                <div id="flashinfo">{{ flash.info|escape }}</div>
                 {% block content %}{% endblock %}
             </div>
         </div>

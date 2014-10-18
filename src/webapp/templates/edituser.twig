@@ -2,25 +2,27 @@
 
 {% block content %}
 
-    <h2>Edit profile</h2>
+<h2>Edit profile</h2>
 
-    <img src="{{ user.avatar|raw }}" alt="" width="400px" />
-    
-    <form enctype="multipart/form-data" method="POST" action="">
-        <div id="flasherror">{{ flash.error|raw }}</div>
+<img src="{{ user.avatar|raw }}" alt="" width="400px" />
 
-        <label>email:</label>
-        <input type="text" name="email" value="{{ user.email|raw }}"> <br />
+<form enctype="multipart/form-data" method="POST" action="">
+    <div id="flasherror">{{ flash.error|raw }}</div>
 
-        <label>Bio:</label>
-        <textarea name="bio">{{ user.bio|raw }}</textarea>
+    <label>email:</label>
+    <input type="text" name="email" value="{{ user.email|raw }}"> <br />
 
-        <label>Age:</label>
-        <input type="text" name="age" value="{{ user.age|raw }}"> <br />
+    <label>Bio:</label>
+    <textarea name="bio">{{ user.bio|raw }}</textarea>
 
-        <label>Avatar:</label>
-        <input type="file" name="avatar"> <br />
-        
-        <input type="submit" name="submit" value="Save profile">
-    </form>
+    <label>Age:</label>
+    <input type="text" name="age" value="{{ user.age|raw }}"> <br />
+
+    <label>Avatar:</label>
+    <input type="file" name="avatar"> <br />
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <input type="submit" name="submit" value="Save profile">
+</form>
 {% endblock %}

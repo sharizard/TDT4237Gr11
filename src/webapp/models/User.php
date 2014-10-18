@@ -7,15 +7,19 @@ use tdt4237\webapp\Hash;
 
 class User extends Avatar
 {  
-    const INSERT_QUERY = "INSERT INTO users(user, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
-    const UPDATE_QUERY = "UPDATE users SET email='%s', age='%s', bio='%s', avatar='%s', isadmin='%s' WHERE id='%s'";
+    const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
+    const UPDATE_QUERY = "UPDATE users SET email=?, age=?, bio=?, avatar='%s', isAdmin=? WHERE id=?";
+    //const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
     const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
 
     const MIN_USER_LENGTH = 3;    
     const MAX_USER_LENGTH = 15;
-        
+    
+    const MIN_PASSWORD_LENGTH = 8;
+
     protected $id = null;
     protected $user;
+    protected $salt;
     protected $pass;
     protected $email;
     protected $bio = 'Bio is empty.';
@@ -29,11 +33,13 @@ class User extends Avatar
     {
     }
 
-    static function make($id, $username, $hash, $email, $bio, $age, $avatar, $isAdmin)
+
+    static function make($id, $username, $salt, $hash, $email, $bio, $age, $avatar, $isAdmin)
     {
         $user = new User();
         $user->id = $id;
         $user->user = $username;
+        $user->salt = $salt;
         $user->pass = $hash;
         $user->email = $email;
         $user->bio = $bio;
@@ -58,6 +64,7 @@ class User extends Avatar
         if ($this->id === null) {
             $query = sprintf(self::INSERT_QUERY,
                 $this->user,
+                $this->salt,
                 $this->pass,
                 $this->email,
                 $this->age,
@@ -66,6 +73,7 @@ class User extends Avatar
                     
                 $this->isAdmin
             );
+            return self::$app->db->exec($query);
         } else {
             $query = sprintf(self::UPDATE_QUERY,
                 $this->email,
@@ -76,9 +84,13 @@ class User extends Avatar
                 $this->isAdmin,
                 $this->id
             );
+            
+            $query = self::$app->db->prepare(self::UPDATE_QUERY);
+            $result = $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
         }
-
-        return self::$app->db->exec($query);
+        //return $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
+        //return self::$app->db->exec($query);
+        return $result;
     }
 
     function getId()
@@ -94,6 +106,10 @@ class User extends Avatar
     function getPasswordHash()
     {
         return $this->pass;
+    }
+
+    function getSalt() {
+        return $this->salt;
     }
 
     function getEmail()
@@ -131,6 +147,11 @@ class User extends Avatar
         $this->pass = $hash;
     }
 
+    function setSalt($salt) 
+    {
+        $this->salt = $salt;
+    }
+
     function setEmail($email)
     {
         $this->email = $email;
@@ -153,15 +174,31 @@ class User extends Avatar
      * @param User $user
      * @return array An array of strings of validation errors
      */
-    static function validate(User $user)
+    static function validate(User $user, $pass)
     {
         $validationErrors = [];
 
         if (strlen($user->user) < self::MIN_USER_LENGTH) {
             array_push($validationErrors, "Username too short. Min length is " . self::MIN_USER_LENGTH);
         }
+
+        $uppercase = preg_match('@[A-Z]@', $pass);
+        $number    = preg_match('@[0-9]@', $pass);
+
         if (strlen($user->user) > self::MAX_USER_LENGTH) {
             array_push($validationErrors, "Username too long. Max length is " . self::MAX_USER_LENGTH);
+        }
+
+        if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
+            array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
+        }
+
+        if (!$uppercase) {
+            array_push($validationErrors, "Password must contain at least one uppcase letter!");
+        }
+
+        if (!$number) {
+            array_push($validationErrors, "Password must contain at least one number!");
         }
 
         if (preg_match('/^[A-Za-z0-9_]+$/', $user->user) === 0) {
@@ -190,6 +227,26 @@ class User extends Avatar
      */
     static function findByUser($username)
     {
+//        $q = self::$app->db->prepare(self::FIND_BY_NAME);
+//        $q->execute(array($username));
+//        $row = $q->setFetchMode(\PDO::FETCH_ASSOC);
+        $query = sprintf(self::FIND_BY_NAME, $username);
+        $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
+        $row = $result->fetch();
+        if($row == false) {
+            return null;
+        }
+
+        return User::makeFromSql($row);
+    }
+
+    /**
+    * Find the users salt in db by username
+    *
+    * @param string $username
+    * @return the users salt
+    */
+    static function findSaltByUser($username) {
         $query = sprintf(self::FIND_BY_NAME, $username);
         $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
         $row = $result->fetch();
@@ -197,8 +254,7 @@ class User extends Avatar
         if($row == false) {
             return null;
         }
-
-        return User::makeFromSql($row);
+        return $row['salt'];
     }
 
     static function deleteByUsername($username)
@@ -227,6 +283,7 @@ class User extends Avatar
         return User::make(
             $row['id'],
             $row['user'],
+            $row['salt'],
             $row['pass'],
             $row['email'],
             $row['bio'],

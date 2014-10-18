@@ -4,6 +4,7 @@ namespace tdt4237\webapp\models;
 
 class MovieReview
 {
+    const INSERT_QUERY = "INSERT INTO moviereviews (movieid, author, text) VALUES (:movieid, :author, :text)";
     const SELECT_BY_ID = "SELECT * FROM moviereviews WHERE id = %s";
 
     private $id = null;
@@ -68,13 +69,11 @@ class MovieReview
         $text = $this->text;
 
         if ($this->id === null) {
-            $query = "INSERT INTO moviereviews (movieid, author, text) "
-                   . "VALUES ('$movieId', '$author', '$text')";
+            $q = static::$app->db->prepare(self::INSERT_QUERY);
         } else {
             // TODO: Update moviereview here
         }
-
-        return static::$app->db->exec($query);
+        return $q->execute(array(':movieid'=>$this->movieId, ':author'=>$this->author, ':text'=>$this->text));
     }
 
     static function makeEmpty()

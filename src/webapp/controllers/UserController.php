@@ -6,17 +6,19 @@ use tdt4237\webapp\models\User;
 use tdt4237\webapp\Hash;
 use tdt4237\webapp\Auth;
 
-class UserController extends Controller
-{
-    function __construct()
-    {
+class UserController extends Controller {
+
+    function __construct() {
         parent::__construct();
     }
 
-    function index()
-    {
+    function index() {
         if (Auth::guest()) {
-            $this->render('newUserForm.twig', []);
+            // Create token and pass it to the rendered template
+            $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+            $this->render('newUserForm.twig', [
+                'csrf_token' => $_SESSION['csrf_token']
+            ]);
         } else {
             $username = Auth::user()->getUserName();
             $this->app->flash('info', 'You are already logged in as ' . $username);
@@ -24,45 +26,58 @@ class UserController extends Controller
         }
     }
 
-    function create()
-    {
-        $request = $this->app->request;
-        $username = $request->post('user');
-        $pass = $request->post('pass');
+    function create() {
+        if ($this->app->request->post('csrf_token') !== null) {
 
-        $hashed = Hash::make($pass);
+            $request = $this->app->request;
+            $username = $request->post('user');
+            $pass = $request->post('pass');
+            $token = $request->post('csrf_token');
 
-        $user = User::makeEmpty();
-        $user->setUsername($username);
-        $user->setHash($hashed);
+            if ($token == $_SESSION['csrf_token']) {
 
-        $validationErrors = User::validate($user);
+                $salt = Hash::createSalt();
+                $hashed_password = Hash::make($pass, $salt);
 
-        if (sizeof($validationErrors) > 0) {
-            $errors = join("<br>\n", $validationErrors);
-            $this->app->flashNow('error', $errors);
-            $this->render('newUserForm.twig', ['username' => $username]);
+                $user = User::makeEmpty();
+                $user->setUsername($username);
+                $user->setSalt($salt);
+                $user->setHash($hashed_password);
+
+                $validationErrors = User::validate($user, $pass);
+
+                if (sizeof($validationErrors) > 0) {
+                    $errors = join("<br>\n", $validationErrors);
+                    $this->app->flashNow('error', $errors);
+
+                    // Create token and pass it to the rendered template
+                    $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+                    $this->render('newUserForm.twig', [
+                        'username' => $username,
+                        'csrf_token' => $_SESSION['csrf_token']
+                    ]);
+                } else {
+                    $user->save();
+                    $this->app->flash('info', 'Thanks for creating a user. Now log in.');
+                    $this->app->redirect('/login');
+                }
+            }
         } else {
-            $user->save();
-            $this->app->flash('info', 'Thanks for creating a user. Now log in.');
-            $this->app->redirect('/login');
+            $this->app->redirect('/user/new');
         }
     }
 
-    function all()
-    {
+    function all() {
         $users = User::all();
         $this->render('users.twig', ['users' => $users]);
     }
 
-    function logout()
-    {
+    function logout() {
         Auth::logout();
         $this->app->redirect('/?msg=Successfully logged out.');
     }
 
-    function show($username)
-    {
+    function show($username) {
         $user = User::findByUser($username);
 
         $this->render('showuser.twig', [
@@ -71,8 +86,7 @@ class UserController extends Controller
         ]);
     }
 
-    function edit()
-    {
+    function edit() {
         if (Auth::guest()) {
             $this->app->flash('info', 'You must be logged in to edit your profile.');
             $this->app->redirect('/login');
@@ -81,7 +95,7 @@ class UserController extends Controller
 
         $user = Auth::user();
 
-        if (! $user) {
+        if (!$user) {
             throw new \Exception("Unable to fetch logged in user's object from db.");
         }
 
@@ -90,22 +104,42 @@ class UserController extends Controller
             $email = $request->post('email');
             $bio = $request->post('bio');
             $age = $request->post('age');
-            
+
             $user->upload($user->getUserName());
 
             $user->setEmail($email);
             $user->setBio($bio);
             $user->setAge($age);
-            
-           
-            if (! User::validateAge($user)) {
+
+
+            if (!User::validateAge($user)) {
                 $this->app->flashNow('error', 'Age must be between 0 and 150.');
             } else {
                 $user->save();
                 $this->app->flashNow('info', 'Your profile was successfully saved.');
-            }
-        }
+                $token = $request->post('csrf_token');
 
-        $this->render('edituser.twig', ['user' => $user]);
+                if ($token == $_SESSION['csrf_token']) {
+
+                    $user->setEmail($email);
+                    $user->setBio($bio);
+                    $user->setAge($age);
+
+                    if (!User::validateAge($user)) {
+                        $this->app->flashNow('error', 'Age must be between 0 and 150.');
+                    } else {
+                        $user->save();
+                        $this->app->flashNow('info', 'Your profile was successfully saved.');
+                    }
+                }
+            }
+
+            // Create token and pass it to the rendered template
+            $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+            $this->render('edituser.twig', [
+                'user' => $user,
+                'csrf_token' => $_SESSION['csrf_token']
+            ]);
+        }
     }
 }

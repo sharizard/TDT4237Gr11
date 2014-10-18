@@ -19,7 +19,13 @@ class Auth
             return false;
         }
 
-        return Hash::check($password, $user->getPasswordHash());
+        $salt = User::findSaltByUser($username);
+
+        if($salt === null) {
+            return false;
+        }
+
+        return Hash::check($password, $salt, $user->getPasswordHash());
     }
 
     /**
