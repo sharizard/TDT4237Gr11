@@ -30,9 +30,14 @@ class UserController extends Controller {
         if ($this->app->request->post('csrf_token') !== null) {
 
             $request = $this->app->request;
-            $username = $request->post('user');
+            $username = $request->post('user');            
+            $email = $request->post('email');
             $pass = $request->post('pass');
             $token = $request->post('csrf_token');
+            
+            if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+                
+            }
 
             if ($token == $_SESSION['csrf_token']) {
 
@@ -40,7 +45,8 @@ class UserController extends Controller {
                 $hashed_password = Hash::make($pass, $salt);
 
                 $user = User::makeEmpty();
-                $user->setUsername($username);
+                $user->setUsername($username);                
+                $user->setEmail($email);
                 $user->setSalt($salt);
                 $user->setHash($hashed_password);
 

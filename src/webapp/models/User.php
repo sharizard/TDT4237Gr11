@@ -8,7 +8,7 @@ use tdt4237\webapp\Hash;
 class User extends Avatar
 {  
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
-    const UPDATE_QUERY = "UPDATE users SET email=?, age=?, bio=?, avatar='%s', isAdmin=? WHERE id=?";
+    const UPDATE_QUERY = "UPDATE users SET email=?, age=?, bio=?, avatar=?, isAdmin=? WHERE id=?";
     //const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
     const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
 
@@ -75,23 +75,20 @@ class User extends Avatar
             );
             return self::$app->db->exec($query);
         } else {
-            $query = sprintf(self::UPDATE_QUERY,
-                $this->email,
-                $this->age,
-                $this->bio,
-                $this->avatar,
-                    
-                $this->isAdmin,
-                $this->id
-            );
+//            $query = sprintf(self::UPDATE_QUERY,
+//                $this->email,
+//                $this->age,
+//                $this->bio,
+//                $this->avatar,
+//                    
+//                $this->isAdmin,
+//                $this->id
+//            );
             
             $query = self::$app->db->prepare(self::UPDATE_QUERY);
             $result = $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
-
-            $query = self::$app->db->prepare(self::UPDATE_QUERY);
-            $result = $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
         }
-        //return $query->execute(array($this->email, $this->age, $this->bio, $this->isAdmin, $this->id));
+        //return $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
         //return self::$app->db->exec($query);
         return $result;
     }

@@ -4,12 +4,12 @@ namespace tdt4237\webapp;
 
 use tdt4237\webapp\models\User;
 
-class Sql
-{
+class Sql {
+
     static $pdo;
 
-    function __construct()
-    {
+    function __construct() {
+        
     }
 
     /**
@@ -24,7 +24,7 @@ class Sql
         self::$pdo->exec($q4);
         self::$pdo->exec($q5);
 
-        print "[tdt4237] Done creating all SQL tables.".PHP_EOL;
+        print "[tdt4237] Done creating all SQL tables." . PHP_EOL;
 
         self::insertDummyUsers();
         self::insertMovies();
@@ -48,7 +48,7 @@ class Sql
         self::$pdo->exec($q2);
         self::$pdo->exec($q3);
 
-        print "[tdt4237] Done inserting dummy users.".PHP_EOL;
+        print "[tdt4237] Done inserting dummy users." . PHP_EOL;
     }
 
     static function insertMovies() {
@@ -71,7 +71,7 @@ class Sql
             self::$pdo->exec($q);
         }
 
-        print "[tdt4237] Done inserting dummy movies.".PHP_EOL;
+        print "[tdt4237] Done inserting dummy movies." . PHP_EOL;
     }
 
     static function down() {
@@ -83,15 +83,17 @@ class Sql
         self::$pdo->exec($q4);
         self::$pdo->exec($q5);
 
-        print "[tdt4237] Done deleting all SQL tables.".PHP_EOL;
+        print "[tdt4237] Done deleting all SQL tables." . PHP_EOL;
     }
+
 }
+
 try {
     // Create (connect to) SQLite database in file
     Sql::$pdo = new \PDO('sqlite:app.db');
     // Set errormode to exceptions
     Sql::$pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-} catch(\PDOException $e) {
+} catch (\PDOException $e) {
     echo $e->getMessage();
     exit();
 }

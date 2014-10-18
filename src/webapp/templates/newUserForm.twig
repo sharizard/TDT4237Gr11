@@ -9,11 +9,18 @@
 
 <form action="" method="POST">
 
-<label>Username: </label>
-<input type="text" name="user" value="{{ username|raw }}"> <br />
-<label>Password: </label>
-<input type="password" name="pass"> <br />
-<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-<input type="submit" name="submit" value="Create new user">
+    <label>Username: </label>
+    <input type="text" name="user" value="{{ username|raw }}" required=""> <br />
+
+    <label>Email: </label>
+    <input type="email" name="email" value="{{ email|raw }}" required=""> <br />
+
+    <label>Password: </label>
+    <input type="password" name="pass"> <br />
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <input type="submit" name="submit" value="Create new user">
+
 </form>
 {% endblock %}

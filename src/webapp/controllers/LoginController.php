@@ -132,9 +132,10 @@ class LoginController extends Controller {
 
             if ($email == NULL) {
                 if ($newpass == $newpass1) {
-                    $hashed = Hash::make($newpass);
-                    $q = $this->app->db->prepare("UPDATE users SET pass=?, reset=? WHERE user=?");
-                    $q->execute(array($hashed, 0, $username));
+                    $salt = Hash::createSalt();
+                    $hash = Hash::make($newpass, $salt);
+                    $q = $this->app->db->prepare("UPDATE users SET pass=?, salt=?, reset=? WHERE user=?");
+                    $q->execute(array($hash, $salt, 0, $username));
                     echo "Updated!";
                 } else {
                     echo "The passwords must match.";
