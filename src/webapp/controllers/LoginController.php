@@ -79,9 +79,9 @@ class LoginController extends Controller {
         $this->app->mail->Host = "smtp.gmail.com"; // SMTP server example
         $this->app->mail->SMTPAuth = true;                  // enable SMTP authentication
         $this->app->mail->Port = 587;                    // set the SMTP port for the GMAIL server
-        $this->app->mail->Username = "sjohistorie@gmail.com"; // SMTP account username example
-        $this->app->mail->Password = "toroskar";
-        $this->app->mail->FromName = 'sjohistorie@gmail.com';
+        $this->app->mail->Username = "moviereviewsgr11@gmail.com"; // SMTP account username example
+        $this->app->mail->Password = "portalen";
+        $this->app->mail->FromName = 'moviereviewsgr11@gmail.com';
         $this->app->mail->SMTPSecure = 'tls'; 
         $this->app->mail->addAddress($to);
         $this->app->mail->Subject = $subject;
@@ -158,7 +158,7 @@ class LoginController extends Controller {
                         $code = rand(10000, 1000000);
                         $to = $db_email;
                         $subject = "Password Recovery";
-                        $body = "Change URL to your local temporarily. Click to reset password: http://localhost:8081/login/recover?code=$code&username=$username";
+                        $body = "Change the URL to fit your local config. Click to reset password: http://localhost:8080/login/recover?code=$code&username=$username";
 
                         $sql = $this->app->db->prepare("UPDATE users SET reset=? WHERE user=?");
                         $sql->execute(array($code, $username));
