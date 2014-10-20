@@ -182,6 +182,10 @@ class User extends Avatar
     {
         $validationErrors = [];
 
+        if(self::findByUser($user->user) != null) {
+            array_push($validationErrors, "Username already exists! Please try a different username.");
+        }
+
         if (strlen($user->user) < self::MIN_USER_LENGTH) {
             array_push($validationErrors, "Username too short. Min length is " . self::MIN_USER_LENGTH);
         }
