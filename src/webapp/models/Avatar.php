@@ -39,15 +39,48 @@ class Avatar {
 
         $fileTemp = $file['tmp_name'];
 
-        $imageTypes = array('jpg', 'png', 'gif');
+        $imageExtensions = array('jpg', 'png', 'gif');
+
         $fileName = $file['name'];
         $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
 
         $newFileName = strtolower($user) . ".jpg";
         $filePath = "web" . self::AVATAR_PATH . $newFileName;
 
+        $imageError = false;
+        if (($fileImageInfo = getimagesize($fileTemp)) === FALSE)
+            switch ($fileImageInfo[2]) {
+                case IMAGETYPE_GIF :
+                    if (!$img = @imagecreatefromgif($fileTemp)) {
+                        trigger_error('Not a GIF image!', E_USER_WARNING);
+                        $imageError = true;
+                    }
+                    break;
+                case IMAGETYPE_JPEG :
+                    if (!$img = @imagecreatefromjpeg($fileTemp)) {
+                        trigger_error('Not a JPEG image!', E_USER_WARNING);
+                        $imageError = true;
+                    }
+                    break;
+                case IMAGETYPE_PNG :
+                    if (!$img = @imagecreatefrompng($fileTemp)) {
+                        trigger_error('Not a PNG image!', E_USER_WARNING);
+                        $imageError = true;
+                    }
+                    break;
+                default :
+                    $imageError = true;
+                    die("The file is not an image!");
+            }
+
+        if ($imageError) {
+            echo "The file is not a valid image!";
+            return;
+        }
+
+
         // File is a valid image -> Upload it
-        if (in_array($fileExtension, $imageTypes)) {
+        if (in_array($fileExtension, $imageExtensions)) {
             if (move_uploaded_file($fileTemp, $filePath)) {
 
                 $noExecMode = 0644;
