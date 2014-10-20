@@ -207,6 +207,28 @@ class User extends Avatar
 
         return $validationErrors;
     }
+    
+    static function validatePass($pass)
+    {
+        $validationErrors = [];
+
+        $uppercase = preg_match('@[A-Z]@', $pass);
+        $number    = preg_match('@[0-9]@', $pass);
+
+        if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
+            array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
+        }
+
+        if (!$uppercase) {
+            array_push($validationErrors, "Password must contain at least one uppcase letter!");
+        }
+
+        if (!$number) {
+            array_push($validationErrors, "Password must contain at least one number!");
+        }
+        
+        return $validationErrors;
+    }
 
     static function validateAge(User $user)
     {
