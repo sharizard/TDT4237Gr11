@@ -3,10 +3,10 @@
 namespace tdt4237\webapp\models;
 
 use tdt4237\webapp\models\Avatar;
-use tdt4237\webapp\Hash;
+use PDO;
 
-class User extends Avatar
-{  
+class User extends Avatar {
+
     protected $id = null;
     protected $user;
     protected $salt;
@@ -15,28 +15,22 @@ class User extends Avatar
     protected $bio = 'Bio is empty.';
     protected $age;
     protected $avatar;
-
     protected $isAdmin = 0;
 
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES(:user, :salt, :pass, :email , :age, :bio, :avatar, :isAdmin)";
     const UPDATE_QUERY = "UPDATE users SET email=:email, age=:age, bio=:bio, avatar=:avatar, isadmin=:isAdmin WHERE id=:id";
-    //const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
-    const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
-
-    const MIN_USER_LENGTH = 3;    
+    const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
+    const MIN_USER_LENGTH = 3;
     const MAX_USER_LENGTH = 15;
-
     const MIN_PASSWORD_LENGTH = 8;
 
     static $app;
 
-    function __construct()
-    {
+    function __construct() {
+        
     }
 
-
-    static function make($id, $username, $salt, $hash, $email, $bio, $age, $avatar, $isAdmin)
-    {
+    static function make($id, $username, $salt, $hash, $email, $bio, $age, $avatar, $isAdmin) {
         $user = new User();
         $user->id = $id;
         $user->user = $username;
@@ -46,69 +40,40 @@ class User extends Avatar
         $user->bio = $bio;
         $user->age = $age;
         $user->avatar = $avatar;
-        
+
         $user->isAdmin = $isAdmin;
 
         return $user;
     }
 
-    static function makeEmpty()
-    {
+    static function makeEmpty() {
         return new User();
     }
 
     /**
      * Insert or update a user object to db.
      */
-    function save()
-    {
+    function save() {
         if ($this->id === null) {
-            /*$query = sprintf(self::INSERT_QUERY,
-                $this->user,
-                $this->salt,
-                $this->pass,
-                $this->email,
-                $this->age,
-                $this->bio,
-                $this->avatar,
-                    
-                $this->isAdmin
-            );*/
-            //return self::$app->db->exec($query);
             $query = self::$app->db->prepare(self::INSERT_QUERY);
             $result = $query->execute(array($this->user, $this->salt, $this->pass,
-                            $this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin));
+                $this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin));
         } else {
-//            $query = sprintf(self::UPDATE_QUERY,
-//                $this->email,
-//                $this->age,
-//                $this->bio,
-//                $this->avatar,
-//                    
-//                $this->isAdmin,
-//                $this->id
-//            );
-            
             $query = self::$app->db->prepare(self::UPDATE_QUERY);
             $result = $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
         }
-        //return $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
-        //return self::$app->db->exec($query);
         return $result;
     }
 
-    function getId()
-    {
+    function getId() {
         return $this->id;
     }
 
-    function getUserName()
-    {
+    function getUserName() {
         return $this->user;
     }
 
-    function getPasswordHash()
-    {
+    function getPasswordHash() {
         return $this->pass;
     }
 
@@ -116,61 +81,50 @@ class User extends Avatar
         return $this->salt;
     }
 
-    function getEmail()
-    {
+    function getEmail() {
         return $this->email;
     }
 
-    function getBio()
-    {
+    function getBio() {
         return $this->bio;
     }
 
-    function getAge()
-    {
+    function getAge() {
         return $this->age;
     }
-    
-    function isAdmin()
-    {
+
+    function isAdmin() {
         return $this->isAdmin === "1";
     }
 
-    function setId($id)
-    {
+    function setId($id) {
         $this->id = $id;
     }
 
-    function setUsername($username)
-    {
+    function setUsername($username) {
         $this->user = $username;
     }
 
-    function setHash($hash)
-    {
+    function setHash($hash) {
         $this->pass = $hash;
     }
 
-    function setSalt($salt) 
-    {
+    function setSalt($salt) {
         $this->salt = $salt;
     }
 
-    function setEmail($email)
-    {
+    function setEmail($email) {
         $this->email = $email;
     }
 
-    function setBio($bio)
-    {
+    function setBio($bio) {
         $this->bio = $bio;
     }
 
-    function setAge($age)
-    {
+    function setAge($age) {
         $this->age = $age;
     }
-   
+
     /**
      * The caller of this function can check the length of the returned 
      * array. If array length is 0, then all checks passed.
@@ -178,11 +132,10 @@ class User extends Avatar
      * @param User $user
      * @return array An array of strings of validation errors
      */
-    static function validate(User $user, $pass)
-    {
+    static function validate(User $user, $pass) {
         $validationErrors = [];
 
-        if(self::findByUser($user->user) != null) {
+        if (self::findByUser($user->user) != null) {
             array_push($validationErrors, "Username already exists! Please try a different username.");
         }
 
@@ -191,7 +144,7 @@ class User extends Avatar
         }
 
         $uppercase = preg_match('@[A-Z]@', $pass);
-        $number    = preg_match('@[0-9]@', $pass);
+        $number = preg_match('@[0-9]@', $pass);
 
         if (strlen($user->user) > self::MAX_USER_LENGTH) {
             array_push($validationErrors, "Username too long. Max length is " . self::MAX_USER_LENGTH);
@@ -215,13 +168,12 @@ class User extends Avatar
 
         return $validationErrors;
     }
-    
-    static function validatePass($pass)
-    {
+
+    static function validatePass($pass) {
         $validationErrors = [];
 
         $uppercase = preg_match('@[A-Z]@', $pass);
-        $number    = preg_match('@[0-9]@', $pass);
+        $number = preg_match('@[0-9]@', $pass);
 
         if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
             array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
@@ -234,12 +186,11 @@ class User extends Avatar
         if (!$number) {
             array_push($validationErrors, "Password must contain at least one number!");
         }
-        
+
         return $validationErrors;
     }
 
-    static function validateAge(User $user)
-    {
+    static function validateAge(User $user) {
         $age = $user->getAge();
 
         if ($age >= 0 && $age <= 150) {
@@ -255,15 +206,11 @@ class User extends Avatar
      * @param string $username
      * @return mixed User or null if not found.
      */
-    static function findByUser($username)
-    {
-//        $q = self::$app->db->prepare(self::FIND_BY_NAME);
-//        $q->execute(array($username));
-//        $row = $q->setFetchMode(\PDO::FETCH_ASSOC);
-        $query = sprintf(self::FIND_BY_NAME, $username);
-        $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
-        $row = $result->fetch();
-        if($row == false) {
+    static function findByUser($username) {
+        $query = self::$app->db->prepare("SELECT * FROM users WHERE user=?");
+        $query->execute(array($username));
+        $row = $query->fetch(PDO::FETCH_ASSOC);
+        if ($row == false) {
             return null;
         }
 
@@ -271,30 +218,28 @@ class User extends Avatar
     }
 
     /**
-    * Find the users salt in db by username
-    *
-    * @param string $username
-    * @return the users salt
-    */
+     * Find the users salt in db by username
+     *
+     * @param string $username
+     * @return the users salt
+     */
     static function findSaltByUser($username) {
-        $query = sprintf(self::FIND_BY_NAME, $username);
-        $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
-        $row = $result->fetch();
+        $query = self::$app->db->prepare("SELECT * FROM users WHERE user=?");
+        $query->execute(array($username));
+        $row = $query->fetch(PDO::FETCH_ASSOC);
 
-        if($row == false) {
+        if ($row == false) {
             return null;
         }
         return $row['salt'];
     }
 
-    static function deleteByUsername($username)
-    {
+    static function deleteByUsername($username) {
         $query = "DELETE FROM users WHERE user='$username' ";
         return self::$app->db->exec($query);
     }
 
-    static function all()
-    {
+    static function all() {
         $query = "SELECT * FROM users";
         $results = self::$app->db->query($query);
 
@@ -308,19 +253,12 @@ class User extends Avatar
         return $users;
     }
 
-    static function makeFromSql($row)
-    {
+    static function makeFromSql($row) {
         return User::make(
-            $row['id'],
-            $row['user'],
-            $row['salt'],
-            $row['pass'],
-            $row['email'],
-            $row['bio'],
-            $row['age'],
-            $row['avatar'],
-            $row['isadmin']
+                        $row['id'], $row['user'], $row['salt'], $row['pass'], $row['email'], $row['bio'], $row['age'], $row['avatar'], $row['isadmin']
         );
     }
+
 }
+
 User::$app = \Slim\Slim::getInstance();

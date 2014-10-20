@@ -84,7 +84,7 @@ class LoginController extends Controller {
         $this->app->mail->addAddress($to);
         $this->app->mail->Subject = $subject;
         $this->app->mail->Body = $body;
-
+        
         if (!$this->app->mail->send()) {
             echo 'Message could not be sent.';
             echo 'Mailer Error: ' . $this->app->mail->ErrorInfo;
