@@ -38,8 +38,13 @@ class LoginController extends Controller {
             $token = $request->post('token');
 
             if ($token == $_SESSION['csrf_token']) {
+            
+            	$ip = $_SERVER['REMOTE_ADDR'];
 
                 if (Auth::checkCredentials($user, $pass)) {
+                
+                $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
+                $q->execute(array($ip));
 
                     // Regenerate session id and clear session array
                     session_regenerate_id();
@@ -58,6 +63,17 @@ class LoginController extends Controller {
                     $this->app->flash('info', "You are now successfully logged in as $user.");
                     $this->app->redirect('/');
                 } else {
+                
+                	$q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address) VALUES (?)");
+                	$q->execute(array($ip));
+                
+                	$q = $this->app->db->prepare("SELECT Count (*) FROM failed_logins WHERE ip_address=?");
+					$q->execute(array($ip));
+					$numRows = $q->fetch(PDO::FETCH_NUM);
+                	
+                	$delay = $numRows[0] / 10;
+					sleep($delay);
+                
                     $this->app->flashNow('error', 'Incorrect user/pass combination.');
 
                     // Create token and pass it to the rendered template
@@ -65,6 +81,7 @@ class LoginController extends Controller {
                     $this->render('login.twig', [
                         'csrf_token' => $_SESSION['csrf_token']
                     ]);
+
                 }
             }
         }
