@@ -18,8 +18,7 @@ class AdminController extends Controller
         $crsf_token = $_SESSION["csrf_token"];
     
         if (Auth::guest()) {
-            $this->app->flash('info', "You must be logged in to view the admin page.");
-            $this->app->redirect('/');
+            $this->app->redirect('/login');
         }
 
         if (! Auth::isAdmin()) {

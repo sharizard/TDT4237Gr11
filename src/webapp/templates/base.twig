@@ -21,31 +21,33 @@
             <div id="navbar">
                 {% if isLoggedIn %}
                     Logged in as {{ loggedInUsername|raw }}.<br>
+                    <form action='/' method='POST'>
+                        <input type="submit" value="Log Out" />
+                    </form>
+
                     <a href="{{ urlFor('editprofile') }}">Edit profile</a> <br>
-                    <a href="{{ urlFor('logout') }}">Log out</a> <br>
+                    <a href="/users">All users</a> <br>
+                    <a href="{{ urlFor('movies') }}">Show all movies</a> <br />
+
+                {% else %}
+                    <a href="{{ urlFor('newuser') }}">Create user</a> <br />
+                    <a href="/login">Login</a> <br>
                 {% endif %}
 
                 {% if isAdmin %}
                     <a href="{{ urlFor('admin') }}">Admin section</a> <br>
                 {% endif %}
+                    
+                </div>
 
-                <br>
-
-                <a href="{{ urlFor('newuser') }}">Create user</a> <br />
-                <a href="/login">Login</a> <br>
-                <a href="/users">All users</a> <br>
-                <a href="{{ urlFor('movies') }}">Show all movies</a> <br />
-
-            </div>
-
-            <div id="content">
-                <div id="flashinfo">{{ flash.info|escape }}</div>
+                <div id="content">
+                    <div id="flashinfo">{{ flash.info|escape }}</div>
                 {% block content %}{% endblock %}
+                </div>
             </div>
-        </div>
 
-        <div id="footer">
+            <div id="footer">
             {% block footer %}here be footer{% endblock %}
-        </div>
-    </body>
-</html>
+                </div>
+            </body>
+        </html>

@@ -15,6 +15,10 @@ class MovieController extends Controller
 
     function index()
     {
+        if (Auth::guest()) {
+            $this->app->redirect('/login');
+        }
+        else{
         $movies = Movie::all();
 
         usort($movies, function ($a, $b) {
@@ -22,6 +26,7 @@ class MovieController extends Controller
         });
 
         $this->render('movies.twig', ['movies' => $movies]);
+        }
     }
 
     /**
@@ -29,6 +34,10 @@ class MovieController extends Controller
      */
     function show($id)
     {
+        if (Auth::guest()) {
+            $this->app->redirect('/login');
+        }
+        else{
     	// Create token and pass it to the rendered template
 		$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
 		
@@ -37,11 +46,15 @@ class MovieController extends Controller
             'reviews' => MovieReview::findByMovieId($id),
             'csrf_token' => $_SESSION['csrf_token']
         ]);
+        }
     }
 
     function addReview($id)
     {
-    
+            if (Auth::guest()) {
+            $this->app->redirect('/login');
+        }
+        else{
         $author = $this->app->request->post('author');
         $text = $this->app->request->post('text');
         $token = $this->app->request->post('csrf_token');
@@ -59,5 +72,6 @@ class MovieController extends Controller
         }
         
         $this->app->redirect('/movies/' . $id);
+        }
     }
 }

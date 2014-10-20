@@ -37,8 +37,8 @@ class UserController extends Controller {
 
             // Email validation
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-               $this->app->flash('error', "Email is not valid");
-               return $this->app->redirect('/user/new');
+                $this->app->flash('error', "Email is not valid");
+                return $this->app->redirect('/user/new');
             }
 
             if ($token == $_SESSION['csrf_token']) {
@@ -79,8 +79,12 @@ class UserController extends Controller {
     }
 
     function all() {
-        $users = User::all();
-        $this->render('users.twig', ['users' => $users]);
+        if (Auth::guest()) {
+            $this->app->redirect('/login');
+        } else {
+            $users = User::all();
+            $this->render('users.twig', ['users' => $users]);
+        }
     }
 
     function logout() {
@@ -99,7 +103,6 @@ class UserController extends Controller {
 
     function edit() {
         if (Auth::guest()) {
-            $this->app->flash('info', 'You must be logged in to edit your profile.');
             $this->app->redirect('/login');
             return;
         }
