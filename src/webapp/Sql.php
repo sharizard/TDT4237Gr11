@@ -19,7 +19,7 @@ class Sql {
         $q1 = "CREATE TABLE users (id INTEGER PRIMARY KEY, user VARCHAR(50), salt VARCHAR(50), pass VARCHAR(50), reset varchar(50), email varchar(50), age varchar(50), bio varhar(50), avatar varchar(100), isadmin INTEGER, timestamp INTEGER);";
         $q4 = "CREATE TABLE movies (id INTEGER PRIMARY KEY, name VARVHAR(50), imageurl VARCHAR(100) );";
         $q5 = "CREATE TABLE moviereviews (id INTEGER PRIMARY KEY, movieid INTEGER, author VARVHAR(50), text VARCHAR(500) );";
-        $q6 = "CREATE TABLE failed_logins (id INTEGER PRIMARY KEY, ip_address INT(12) );";
+        $q6 = "CREATE TABLE failed_logins (id INTEGER PRIMARY KEY, ip_address INT(11), times_failed INTEGER );";
 
         self::$pdo->exec($q1);
         self::$pdo->exec($q4);

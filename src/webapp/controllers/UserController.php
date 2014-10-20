@@ -121,7 +121,9 @@ class UserController extends Controller {
             $age = $request->post('age');
 
             // Upload avatar if selected
-            $user->upload($user->getUserName());
+            if ($_FILES["avatar"]["error"] != 4) {
+                $user->upload($user->getUserName());
+            }
 
             // Validate Email
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {

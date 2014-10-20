@@ -2,8 +2,9 @@ app.db
 tags
 composer.phar
 vendor/*
-*.php~
 
+*.php~
+web/images/avatars/*
 #
 # OS garbage, Editors, IDEs, etc
 #

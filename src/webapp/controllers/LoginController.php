@@ -30,7 +30,7 @@ class LoginController extends Controller {
     }
 
     function login() {
-        
+
         if ($this->app->request->post('token') !== null) {
 
             $request = $this->app->request;
@@ -47,7 +47,7 @@ class LoginController extends Controller {
                     $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
                     $q->execute(array($ip));
 
-                    
+
                     // Regenerate session id and clear session array
                     session_regenerate_id();
                     $_SESSION = array();
@@ -65,14 +65,22 @@ class LoginController extends Controller {
                     $this->app->flash('info', "You are now successfully logged in as $user.");
                     $this->app->redirect('/');
                 } else {
-                    $q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address) VALUES (?)");
-                    $q->execute(array($ip));
 
-                    $q = $this->app->db->prepare("SELECT Count (*) FROM failed_logins WHERE ip_address=?");
-                    $q->execute(array($ip));
-                    $numRows = $q->fetch(PDO::FETCH_NUM);
 
-                    $delay = $numRows[0] / 10;
+                    $q = $this->app->db->prepare("SELECT times_failed FROM failed_logins WHERE ip_address=?");
+                    $q->execute(array($ip));
+                    $result = $q->fetch(PDO::FETCH_NUM);
+                    $delay = $result[0];
+
+                    if ($delay == 0) {
+                        $q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address, times_failed) VALUES (?, 1)");
+                        $q->execute(array($ip));
+                    } else {
+                        $q = $this->app->db->prepare("UPDATE failed_logins SET times_failed=times_failed+1 WHERE ip_address = ?");
+                        $q->execute(array($ip));
+                    }
+
+
                     sleep($delay);
 
                     $this->app->flashNow('error', 'Incorrect user/pass combination.');
@@ -193,8 +201,8 @@ class LoginController extends Controller {
                     $db_email = $row['email'];
 
                     if ($email == $db_email) {
-                        
-                        $timestamp = time();                        
+
+                        $timestamp = time();
                         $code = RandomStringGenerator::generateRandomString();
                         $to = $db_email;
                         $subject = "Password Recovery";
