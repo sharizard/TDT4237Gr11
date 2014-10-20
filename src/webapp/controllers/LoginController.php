@@ -64,14 +64,20 @@ class LoginController extends Controller {
                     $this->app->redirect('/');
                 } else {
                 
-                	$q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address) VALUES (?)");
-                	$q->execute(array($ip));
-                
-                	$q = $this->app->db->prepare("SELECT Count (*) FROM failed_logins WHERE ip_address=?");
+                	$q = $this->app->db->prepare("SELECT times_failed FROM failed_logins WHERE ip_address=?");
 					$q->execute(array($ip));
-					$numRows = $q->fetch(PDO::FETCH_NUM);
+					$result = $q->fetch(PDO::FETCH_NUM);
+					$delay = $result[0];
+					
+					if ($delay == 0) {
+						$q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address, times_failed) VALUES (?, 1)");
+						$q->execute(array($ip));
+					} else {
+						$q = $this->app->db->prepare("UPDATE failed_logins SET times_failed=times_failed+1 WHERE ip_address = ?");
+						$q->execute(array($ip));
+					}
                 	
-                	$delay = $numRows[0] / 10;
+                	
 					sleep($delay);
                 
                     $this->app->flashNow('error', 'Incorrect user/pass combination.');
