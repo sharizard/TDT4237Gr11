@@ -30,6 +30,7 @@ class LoginController extends Controller {
     }
 
     function login() {
+        
         if ($this->app->request->post('token') !== null) {
 
             $request = $this->app->request;
@@ -38,14 +39,15 @@ class LoginController extends Controller {
             $token = $request->post('token');
 
             if ($token == $_SESSION['csrf_token']) {
-            
-            	$ip = $_SERVER['REMOTE_ADDR'];
+
+                $ip = $_SERVER['REMOTE_ADDR'];
 
                 if (Auth::checkCredentials($user, $pass)) {
-                
-                $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
-                $q->execute(array($ip));
 
+                    $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
+                    $q->execute(array($ip));
+
+                    
                     // Regenerate session id and clear session array
                     session_regenerate_id();
                     $_SESSION = array();
@@ -63,17 +65,16 @@ class LoginController extends Controller {
                     $this->app->flash('info', "You are now successfully logged in as $user.");
                     $this->app->redirect('/');
                 } else {
-                
-                	$q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address) VALUES (?)");
-                	$q->execute(array($ip));
-                
-                	$q = $this->app->db->prepare("SELECT Count (*) FROM failed_logins WHERE ip_address=?");
-					$q->execute(array($ip));
-					$numRows = $q->fetch(PDO::FETCH_NUM);
-                	
-                	$delay = $numRows[0] / 10;
-					sleep($delay);
-                
+                    $q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address) VALUES (?)");
+                    $q->execute(array($ip));
+
+                    $q = $this->app->db->prepare("SELECT Count (*) FROM failed_logins WHERE ip_address=?");
+                    $q->execute(array($ip));
+                    $numRows = $q->fetch(PDO::FETCH_NUM);
+
+                    $delay = $numRows[0] / 10;
+                    sleep($delay);
+
                     $this->app->flashNow('error', 'Incorrect user/pass combination.');
 
                     // Create token and pass it to the rendered template
@@ -81,7 +82,6 @@ class LoginController extends Controller {
                     $this->render('login.twig', [
                         'csrf_token' => $_SESSION['csrf_token']
                     ]);
-
                 }
             }
         }
@@ -101,12 +101,13 @@ class LoginController extends Controller {
         $this->app->mail->addAddress($to);
         $this->app->mail->Subject = $subject;
         $this->app->mail->Body = $body;
-        
+
         if (!$this->app->mail->send()) {
-            echo 'Message could not be sent.';
-            echo 'Mailer Error: ' . $this->app->mail->ErrorInfo;
+            $this->app->flashNow('error', "Message could not be sent.");
+            $this->render('recover.twig', []);
         } else {
-            echo "Email sent! <br/> Follow the email's description to reset password.";
+            $this->app->flashNow('info', "Email sent! Follow the email's description to reset password.");
+            $this->render('recover.twig', []);
         }
     }
 
@@ -192,20 +193,23 @@ class LoginController extends Controller {
                     $db_email = $row['email'];
 
                     if ($email == $db_email) {
+                        
+                        $timestamp = time();                        
                         $code = RandomStringGenerator::generateRandomString();
-//                        $code = rand(1000000, 1000000000);
                         $to = $db_email;
                         $subject = "Password Recovery";
                         $body = "Change the URL to fit your local config. Click to reset password: http://localhost:8080/login/recover?reset=$code&username=$username";
 
-                        $sql = $this->app->db->prepare("UPDATE users SET reset=? WHERE user=?");
-                        $sql->execute(array($code, $username));
+                        $sql = $this->app->db->prepare("UPDATE users SET reset=?, timestamp=? WHERE user=?");
+                        $sql->execute(array($code, $timestamp, $username));
                         $this->sendMail($to, $subject, $body);
                     } else {
-                        echo "Incorrect email";
+                        $this->app->flashNow('error', "Incorrect email");
+                        $this->render('recover.twig', []);
                     }
                 } else {
-                    echo "Username doesn't exist";
+                    $this->app->flashNow('error', "Username doesn't exist");
+                    $this->render('recover.twig', []);
                 }
             }
         }
