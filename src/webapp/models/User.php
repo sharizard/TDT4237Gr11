@@ -14,7 +14,7 @@ class User extends Avatar {
     protected $email;
     protected $bio = 'Bio is empty.';
     protected $age;
-    protected $avatar;
+
     protected $isAdmin = 0;
 
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES(:user, :salt, :pass, :email , :age, :bio, :avatar, :isAdmin)";
@@ -30,10 +30,12 @@ class User extends Avatar {
         
     }
 
-    static function make($id, $username, $salt, $hash, $email, $bio, $age, $avatar, $isAdmin) {
+
+    static function make($id, $username, $salt, $hash, $email, $bio, $age, $avatar, $isAdmin)
+    {
         $user = new User();
         $user->id = $id;
-        $user->user = $username;
+        $user->user = strtolower($username);
         $user->salt = $salt;
         $user->pass = $hash;
         $user->email = $email;
@@ -101,8 +103,9 @@ class User extends Avatar {
         $this->id = $id;
     }
 
-    function setUsername($username) {
-        $this->user = $username;
+    function setUsername($username)
+    {
+        $this->user = strtolower($username);
     }
 
     function setHash($hash) {
@@ -206,6 +209,7 @@ class User extends Avatar {
      * @param string $username
      * @return mixed User or null if not found.
      */
+
     static function findByUser($username) {
         $query = self::$app->db->prepare("SELECT * FROM users WHERE user=?");
         $query->execute(array($username));
@@ -235,7 +239,8 @@ class User extends Avatar {
     }
 
     static function deleteByUsername($username) {
-        $query = "DELETE FROM users WHERE user='$username' ";
+        $usernameLowercase = strtolower($username);
+        $query = "DELETE FROM users WHERE user='$usernameLowercase' ";
         return self::$app->db->exec($query);
     }
 

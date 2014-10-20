@@ -28,6 +28,9 @@ class Sql {
 
         self::insertDummyUsers();
         self::insertMovies();
+        
+        $noExecMode = 0644;
+        chmod("web" . User::AVATAR_PATH, $noExecMode);
     }
 
     static function insertDummyUsers() {
