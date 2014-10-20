@@ -14,7 +14,6 @@ class User extends Avatar
     protected $email;
     protected $bio = 'Bio is empty.';
     protected $age;
-    protected $avatar;
 
     protected $isAdmin = 0;
 
@@ -34,12 +33,11 @@ class User extends Avatar
     {
     }
 
-
     static function make($id, $username, $salt, $hash, $email, $bio, $age, $avatar, $isAdmin)
     {
         $user = new User();
         $user->id = $id;
-        $user->user = $username;
+        $user->user = strtolower($username);
         $user->salt = $salt;
         $user->pass = $hash;
         $user->email = $email;
@@ -63,37 +61,13 @@ class User extends Avatar
     function save()
     {
         if ($this->id === null) {
-            /*$query = sprintf(self::INSERT_QUERY,
-                $this->user,
-                $this->salt,
-                $this->pass,
-                $this->email,
-                $this->age,
-                $this->bio,
-                $this->avatar,
-                    
-                $this->isAdmin
-            );*/
-            //return self::$app->db->exec($query);
             $query = self::$app->db->prepare(self::INSERT_QUERY);
             $result = $query->execute(array($this->user, $this->salt, $this->pass,
                             $this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin));
         } else {
-//            $query = sprintf(self::UPDATE_QUERY,
-//                $this->email,
-//                $this->age,
-//                $this->bio,
-//                $this->avatar,
-//                    
-//                $this->isAdmin,
-//                $this->id
-//            );
-            
             $query = self::$app->db->prepare(self::UPDATE_QUERY);
             $result = $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
         }
-        //return $query->execute(array($this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin, $this->id));
-        //return self::$app->db->exec($query);
         return $result;
     }
 
@@ -143,7 +117,7 @@ class User extends Avatar
 
     function setUsername($username)
     {
-        $this->user = $username;
+        $this->user = strtolower($username);
     }
 
     function setHash($hash)
@@ -260,7 +234,7 @@ class User extends Avatar
 //        $q = self::$app->db->prepare(self::FIND_BY_NAME);
 //        $q->execute(array($username));
 //        $row = $q->setFetchMode(\PDO::FETCH_ASSOC);
-        $query = sprintf(self::FIND_BY_NAME, $username);
+        $query = sprintf(self::FIND_BY_NAME, strtolower($username));
         $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
         $row = $result->fetch();
         if($row == false) {
@@ -277,7 +251,7 @@ class User extends Avatar
     * @return the users salt
     */
     static function findSaltByUser($username) {
-        $query = sprintf(self::FIND_BY_NAME, $username);
+        $query = sprintf(self::FIND_BY_NAME, strtolower($username));
         $result = self::$app->db->query($query, \PDO::FETCH_ASSOC);
         $row = $result->fetch();
 
@@ -289,7 +263,8 @@ class User extends Avatar
 
     static function deleteByUsername($username)
     {
-        $query = "DELETE FROM users WHERE user='$username' ";
+        $usernameLowercase = strtolower($username);
+        $query = "DELETE FROM users WHERE user='$usernameLowercase' ";
         return self::$app->db->exec($query);
     }
 

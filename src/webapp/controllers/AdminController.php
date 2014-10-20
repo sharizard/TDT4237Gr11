@@ -39,7 +39,6 @@ class AdminController extends Controller
     	$request = $this->app->request;
         $token = $request->get('csrf_token');
         
-    	
     	if (Auth::guest() || !Auth::isAdmin()) {
 	    	$this->app->flash('info', "You must be administrator to view the admin page.");
             $this->app->redirect('/');
