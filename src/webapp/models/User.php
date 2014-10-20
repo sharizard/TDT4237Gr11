@@ -7,16 +7,6 @@ use tdt4237\webapp\Hash;
 
 class User extends Avatar
 {  
-    const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES('%s', '%s', '%s', '%s' , '%s' , '%s', '%s', '%s')";
-    const UPDATE_QUERY = "UPDATE users SET email=?, age=?, bio=?, avatar=?, isAdmin=? WHERE id=?";
-    //const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
-    const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
-
-    const MIN_USER_LENGTH = 3;    
-    const MAX_USER_LENGTH = 15;
-
-    const MIN_PASSWORD_LENGTH = 8;
-
     protected $id = null;
     protected $user;
     protected $salt;
@@ -24,8 +14,19 @@ class User extends Avatar
     protected $email;
     protected $bio = 'Bio is empty.';
     protected $age;
+    protected $avatar;
 
     protected $isAdmin = 0;
+
+    const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES(:user, :salt, :pass, :email , :age, :bio, :avatar, :isAdmin)";
+    const UPDATE_QUERY = "UPDATE users SET email=:email, age=:age, bio=:bio, avatar=:avatar, isadmin=:isAdmin WHERE id=:id";
+    //const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
+    const FIND_BY_NAME = "SELECT * FROM users WHERE user='%s'";
+
+    const MIN_USER_LENGTH = 3;    
+    const MAX_USER_LENGTH = 15;
+
+    const MIN_PASSWORD_LENGTH = 8;
 
     static $app;
 
@@ -62,7 +63,7 @@ class User extends Avatar
     function save()
     {
         if ($this->id === null) {
-            $query = sprintf(self::INSERT_QUERY,
+            /*$query = sprintf(self::INSERT_QUERY,
                 $this->user,
                 $this->salt,
                 $this->pass,
@@ -72,8 +73,11 @@ class User extends Avatar
                 $this->avatar,
                     
                 $this->isAdmin
-            );
-            return self::$app->db->exec($query);
+            );*/
+            //return self::$app->db->exec($query);
+            $query = self::$app->db->prepare(self::INSERT_QUERY);
+            $result = $query->execute(array($this->user, $this->salt, $this->pass,
+                            $this->email, $this->age, $this->bio, $this->avatar, $this->isAdmin));
         } else {
 //            $query = sprintf(self::UPDATE_QUERY,
 //                $this->email,
@@ -178,6 +182,10 @@ class User extends Avatar
     {
         $validationErrors = [];
 
+        if(self::findByUser($user->user) != null) {
+            array_push($validationErrors, "Username already exists! Please try a different username.");
+        }
+
         if (strlen($user->user) < self::MIN_USER_LENGTH) {
             array_push($validationErrors, "Username too short. Min length is " . self::MIN_USER_LENGTH);
         }
@@ -205,6 +213,28 @@ class User extends Avatar
             array_push($validationErrors, 'Username can only contain letters and numbers');
         }
 
+        return $validationErrors;
+    }
+    
+    static function validatePass($pass)
+    {
+        $validationErrors = [];
+
+        $uppercase = preg_match('@[A-Z]@', $pass);
+        $number    = preg_match('@[0-9]@', $pass);
+
+        if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
+            array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
+        }
+
+        if (!$uppercase) {
+            array_push($validationErrors, "Password must contain at least one uppcase letter!");
+        }
+
+        if (!$number) {
+            array_push($validationErrors, "Password must contain at least one number!");
+        }
+        
         return $validationErrors;
     }
 

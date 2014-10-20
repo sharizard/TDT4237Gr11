@@ -1,21 +1,23 @@
 {% extends 'base.twig' %}
 
 {% block content %}
+
+<b>{{ flash.error|raw }}</b> <br />
     
-    {% if code == null %}
+    {% if reset == null %}
         <form action='' method='POST'>
             <label>Enter your username: </label>
-            <input type='text' name='username'> <br />
+            <input type='text' name='username' required=""> <br />
             <label>Enter your email: </label>
-            <input type='text' name='email'> <br />
+            <input type='text' name='email' required=""> <br />
             <input type='submit' name='Submit' value='Submit'>
         </form>
     {% else %}
         <form action='' method='POST'>
             <label>Enter a new password: </label>
-            <input type='password' name='newpass'> <br />
+            <input type='password' name='newpass' required=""> <br />
             <label>Re-enter your password: </label>
-            <input type='password' name='newpass1'> <br />
+            <input type='password' name='newpass1' required=""> <br />
             <input type='hidden' name='username' value='{{username}}'>
             <input type='submit' name='Submit' value='Update Password'>
         </form>
