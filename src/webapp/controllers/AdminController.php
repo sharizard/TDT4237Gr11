@@ -36,7 +36,7 @@ class AdminController extends Controller
     function delete($username)
     {
     	$request = $this->app->request;
-        $token = $request->get('csrf_token');
+        $token = $request->post('csrf_token');
         
     	if (Auth::guest() || !Auth::isAdmin()) {
 	    	$this->app->flash('info', "You must be administrator to view the admin page.");
@@ -46,7 +46,7 @@ class AdminController extends Controller
     	else if (Auth::isAdmin()) {
     	
     		// Only performs the deletion if the admin pushed the delete button
-    		if ($token == $_SESSION["csrf_token"]) {
+    		if ($this->app->request->isPost() && $token == $_SESSION["csrf_token"]) {
     		
 	    		if (User::deleteByUsername($username) === 1) {
 	            	$this->app->flash('info', "Sucessfully deleted '$username'");
