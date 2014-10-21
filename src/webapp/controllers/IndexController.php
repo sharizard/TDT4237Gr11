@@ -4,19 +4,16 @@ namespace tdt4237\webapp\controllers;
 
 use tdt4237\webapp\models\NewsItem;
 
-class IndexController extends Controller
-{
-    function __construct()
-    {
+class IndexController extends Controller {
+
+    function __construct() {
         parent::__construct();
     }
 
-    function index()
-    {
+    function index() {
         echo time();
         $request = $this->app->request;
         $msg = $request->get('msg');
-
         $variables = [];
 
         if ($msg) {
@@ -25,4 +22,5 @@ class IndexController extends Controller
 
         $this->render('index.twig', $variables);
     }
+
 }
