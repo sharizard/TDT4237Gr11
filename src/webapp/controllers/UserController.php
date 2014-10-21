@@ -110,8 +110,10 @@ class UserController extends Controller {
         if ($this->app->request->isPost()) {
             $request = $this->app->request;
             $email = $request->post('email');
-            $bio = $request->post('bio');
-            $age = $request->post('age');
+
+            $bio = filter_var($request->post('bio'), FILTER_SANITIZE_STRING);
+            $age = filter_var($request->post('age'), FILTER_SANITIZE_STRING);
+        
             // Upload avatar if selected
             if ($_FILES["avatar"]["error"] != 4) {
                 $user->upload($user->getUserName());
@@ -121,6 +123,7 @@ class UserController extends Controller {
                 $this->app->flash('error', 'Invalid email');
                 return $this->app->redirect('edit');
             }
+            
             $user->setEmail($email);
             $user->setBio($bio);
             $user->setAge($age);
