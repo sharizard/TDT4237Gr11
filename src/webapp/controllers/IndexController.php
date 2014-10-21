@@ -11,7 +11,6 @@ class IndexController extends Controller {
     }
 
     function index() {
-        echo time();
         $request = $this->app->request;
         $msg = $request->get('msg');
         $variables = [];
