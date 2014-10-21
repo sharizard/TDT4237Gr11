@@ -31,27 +31,22 @@ class LoginController extends Controller {
 
     function login() {
         if ($this->app->request->post('token') !== null) {
-
             $request = $this->app->request;
             $user = $request->post('user');
             $pass = $request->post('pass');
             $token = $request->post('token');
 
             if ($token == $_SESSION['csrf_token']) {
-            
-            	$ip = $_SERVER['REMOTE_ADDR'];
+                $ip = $_SERVER['REMOTE_ADDR'];
 
                 if (Auth::checkCredentials($user, $pass)) {
-                
-                $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
-                $q->execute(array($ip));
+                    $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
+                    $q->execute(array($ip));
 
                     // Regenerate session id and clear session array
                     session_regenerate_id();
                     $_SESSION = array();
-
                     $_SESSION['user'] = $user;
-
                     $isAdmin = Auth::user()->isAdmin();
 
                     if ($isAdmin) {
@@ -63,23 +58,21 @@ class LoginController extends Controller {
                     $this->app->flash('info', "You are now successfully logged in as $user.");
                     $this->app->redirect('/');
                 } else {
-                
-                	$q = $this->app->db->prepare("SELECT times_failed FROM failed_logins WHERE ip_address=?");
-					$q->execute(array($ip));
-					$result = $q->fetch(PDO::FETCH_NUM);
-					$delay = $result[0];
-					
-					if ($delay == 0) {
-						$q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address, times_failed) VALUES (?, 1)");
-						$q->execute(array($ip));
-					} else {
-						$q = $this->app->db->prepare("UPDATE failed_logins SET times_failed=times_failed+1 WHERE ip_address = ?");
-						$q->execute(array($ip));
-					}
-                	
-                	
-					sleep($delay);
-                
+
+                    $q = $this->app->db->prepare("SELECT times_failed FROM failed_logins WHERE ip_address=?");
+                    $q->execute(array($ip));
+                    $result = $q->fetch(PDO::FETCH_NUM);
+                    $delay = $result[0];
+
+                    if ($delay == 0) {
+                        $q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address, times_failed) VALUES (?, 1)");
+                        $q->execute(array($ip));
+                    } else {
+                        $q = $this->app->db->prepare("UPDATE failed_logins SET times_failed=times_failed+1 WHERE ip_address = ?");
+                        $q->execute(array($ip));
+                    }
+
+                    sleep($delay);
                     $this->app->flashNow('error', 'Incorrect user/pass combination.');
 
                     // Create token and pass it to the rendered template
@@ -87,14 +80,12 @@ class LoginController extends Controller {
                     $this->render('login.twig', [
                         'csrf_token' => $_SESSION['csrf_token']
                     ]);
-
                 }
             }
         }
     }
 
     function sendMail($to, $subject, $body) {
-
         $this->app->mail->isSMTP();
         $this->app->mail->CharSet = 'UTF-8';
         $this->app->mail->Host = "smtp.gmail.com"; // SMTP server example
@@ -107,12 +98,13 @@ class LoginController extends Controller {
         $this->app->mail->addAddress($to);
         $this->app->mail->Subject = $subject;
         $this->app->mail->Body = $body;
-        
+
         if (!$this->app->mail->send()) {
-            echo 'Message could not be sent.';
-            echo 'Mailer Error: ' . $this->app->mail->ErrorInfo;
+            $this->app->flashNow('error', "Message could not be sent.");
+            $this->render('recover.twig', []);
         } else {
-            echo "Email sent! <br/> Follow the email's description to reset password.";
+            $this->app->flashNow('info', "Email sent! Follow the email's description to reset password.");
+            $this->render('recover.twig', []);
         }
     }
 
@@ -134,11 +126,18 @@ class LoginController extends Controller {
 
             $db_code = $row['reset'];
             $db_username = $row['user'];
+            $db_timestamp = $row['timestamp'];
 
             // Return the "set new password page".
             if ($get_code != null) {
-                if ($get_username == $db_username && $get_code == $db_code) {
-                    $this->render('recover.twig', ['reset' => $get_code, 'username' => $db_username]);
+                $currentTime = time();
+                $diff = $currentTime - $db_timestamp;
+                if ($diff > 600) {
+                    echo "Link has expired!";
+                } else {
+                    if ($get_username == $db_username && $get_code == $db_code) {
+                        $this->render('recover.twig', ['reset' => $get_code, 'username' => $db_username]);
+                    }
                 }
             }
         }
@@ -147,7 +146,6 @@ class LoginController extends Controller {
             $request = $this->app->request;
             $username = $request->post('username');
             $email = $request->post('email');
-
             $newpass = $request->post('newpass');
             $newpass1 = $request->post('newpass1');
             $code = $request->get('reset');
@@ -156,13 +154,11 @@ class LoginController extends Controller {
             if ($email == NULL) {
                 // Validate passwords
                 if ($newpass == $newpass1) {
-
                     $validationErrors = User::validatePass($newpass);
 
                     if (sizeof($validationErrors) > 0) {
                         $errors = join("<br>\n", $validationErrors);
                         $this->app->flashNow('error', $errors);
-
                         $this->render('recover.twig', [
                             'reset' => $code,
                             'username' => $username
@@ -190,28 +186,27 @@ class LoginController extends Controller {
                 $numRows = $q->fetch(PDO::FETCH_NUM);
 
                 if ($numRows[0] != 0) {
-
                     $a = $this->app->db->prepare("SELECT * FROM users WHERE user=?");
                     $a->execute(array($username));
                     $row = $a->fetch(PDO::FETCH_ASSOC);
-
                     $db_email = $row['email'];
 
                     if ($email == $db_email) {
+                        $timestamp = time();
                         $code = RandomStringGenerator::generateRandomString();
-//                        $code = rand(1000000, 1000000000);
                         $to = $db_email;
                         $subject = "Password Recovery";
                         $body = "Change the URL to fit your local config. Click to reset password: http://localhost:8080/login/recover?reset=$code&username=$username";
-
-                        $sql = $this->app->db->prepare("UPDATE users SET reset=? WHERE user=?");
-                        $sql->execute(array($code, $username));
+                        $sql = $this->app->db->prepare("UPDATE users SET reset=?, timestamp=? WHERE user=?");
+                        $sql->execute(array($code, $timestamp, $username));
                         $this->sendMail($to, $subject, $body);
                     } else {
-                        echo "Incorrect email";
+                        $this->app->flashNow('error', "Incorrect email");
+                        $this->render('recover.twig', []);
                     }
                 } else {
-                    echo "Username doesn't exist";
+                    $this->app->flashNow('error', "Username doesn't exist");
+                    $this->render('recover.twig', []);
                 }
             }
         }

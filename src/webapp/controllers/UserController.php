@@ -28,13 +28,11 @@ class UserController extends Controller {
 
     function create() {
         if ($this->app->request->post('csrf_token') !== null) {
-
             $request = $this->app->request;
             $username = $request->post('user');
             $email = $request->post('email');
             $pass = $request->post('pass');
             $token = $request->post('csrf_token');
-
             // Email validation
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->app->flash('error', "Email is not valid");
@@ -42,16 +40,13 @@ class UserController extends Controller {
             }
 
             if ($token == $_SESSION['csrf_token']) {
-
                 $salt = Hash::createSalt();
                 $hashed_password = Hash::make($pass, $salt);
-
                 $user = User::makeEmpty();
                 $user->setUsername($username);
                 $user->setEmail($email);
                 $user->setSalt($salt);
                 $user->setHash($hashed_password);
-
                 $validationErrors = User::validate($user, $pass);
 
                 if (sizeof($validationErrors) > 0) {
@@ -94,7 +89,6 @@ class UserController extends Controller {
 
     function show($username) {
         $user = User::findByUser($username);
-
         $this->render('showuser.twig', [
             'user' => $user,
             'username' => $username
@@ -114,17 +108,16 @@ class UserController extends Controller {
         }
 
         if ($this->app->request->isPost()) {
-
             $request = $this->app->request;
             $email = $request->post('email');
+
             $bio = filter_var($request->post('bio'), FILTER_SANITIZE_STRING);
             $age = filter_var($request->post('age'), FILTER_SANITIZE_STRING);
-
+        
             // Upload avatar if selected
             if ($_FILES["avatar"]["error"] != 4) {
                 $user->upload($user->getUserName());
             }
-
             // Validate Email
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $this->app->flash('error', 'Invalid email');
@@ -134,11 +127,9 @@ class UserController extends Controller {
             $user->setEmail($email);
             $user->setBio($bio);
             $user->setAge($age);
-
             $token = $request->post('csrf_token');
 
             if ($token == $_SESSION['csrf_token']) {
-
                 $user->setEmail($email);
                 $user->setBio($bio);
                 $user->setAge($age);
@@ -151,7 +142,6 @@ class UserController extends Controller {
                 }
             }
         }
-
         // Create token and pass it to the rendered template
         $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
         $this->render('edituser.twig', [
