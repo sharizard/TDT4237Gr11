@@ -20,11 +20,11 @@
             <th>Age</th>
         </tr>
         <tr>
-            <td>{{ user.id|raw }}</td>
-            <td>{{ user.username|raw }}</td>
-            <td>{{ user.email|raw }}</td>
-            <td>{{ user.bio|raw }}</td>
-            <td>{{ user.age|raw }}</td>
+            <td>{{ user.id|escape }}</td>
+            <td>{{ user.username|escape }}</td>
+            <td>{{ user.email|escape }}</td>
+            <td>{{ user.bio|escape }}</td>
+            <td>{{ user.age|escape }}</td>
         </tr>
     </table>
 {% else %}

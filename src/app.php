@@ -60,7 +60,7 @@ $app->post('/', $ns . 'UserController:logout');
 
 // Admin restricted area
 $app->get('/admin', $ns . 'AdminController:index')->name('admin');
-$app->get('/admin/delete/:username', $ns . 'AdminController:delete');
+$app->post('/admin/delete/:username', $ns . 'AdminController:delete');
 
 // Movies
 $app->get('/movies', $ns . 'MovieController:index')->name('movies');
