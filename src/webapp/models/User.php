@@ -19,7 +19,7 @@ class User extends Avatar {
 
     const INSERT_QUERY = "INSERT INTO users(user, salt, pass, email, age, bio, avatar, isadmin) VALUES(:user, :salt, :pass, :email , :age, :bio, :avatar, :isAdmin)";
     const UPDATE_QUERY = "UPDATE users SET email=:email, age=:age, bio=:bio, avatar=:avatar, isadmin=:isAdmin WHERE id=:id";
-    const FIND_BY_NAME = "SELECT * FROM users WHERE user=?";
+    const FIND_BY_NAME = "SELECT * FROM users WHERE user=:user";
     const MIN_USER_LENGTH = 3;
     const MAX_USER_LENGTH = 15;
     const MIN_PASSWORD_LENGTH = 8;
@@ -211,7 +211,7 @@ class User extends Avatar {
      */
 
     static function findByUser($username) {
-        $query = self::$app->db->prepare("SELECT * FROM users WHERE user=?");
+        $query = self::$app->db->prepare(self::FIND_BY_NAME);
         $query->execute(array($username));
         $row = $query->fetch(PDO::FETCH_ASSOC);
         if ($row == false) {
@@ -228,7 +228,7 @@ class User extends Avatar {
      * @return the users salt
      */
     static function findSaltByUser($username) {
-        $query = self::$app->db->prepare("SELECT * FROM users WHERE user=?");
+        $query = self::$app->db->prepare(self::FIND_BY_NAME);
         $query->execute(array($username));
         $row = $query->fetch(PDO::FETCH_ASSOC);
 
@@ -240,13 +240,15 @@ class User extends Avatar {
 
     static function deleteByUsername($username) {
         $usernameLowercase = strtolower($username);
-        $query = "DELETE FROM users WHERE user='$usernameLowercase' ";
-        return self::$app->db->exec($query);
+        $DELETE_BY_NAME = "DELETE FROM users WHERE user=:user";
+        $query = self::$app->db->prepare($DELETE_BY_NAME);
+        return $query->execute(array($usernameLowercase));
     }
 
     static function all() {
         $query = "SELECT * FROM users";
-        $results = self::$app->db->query($query);
+        $results = self::$app->db->prepare($query);
+        $results->execute(array());
 
         $users = [];
 

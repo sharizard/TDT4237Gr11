@@ -46,7 +46,8 @@ class AdminController extends Controller {
     		// Only performs the deletion if the admin pushed the delete button
     		if ($this->app->request->isPost() && $token == $_SESSION["csrf_token"]) {
     		
-	    		if (User::deleteByUsername($username) === 1) {
+                // if # rows is bigger than 0, meaning that we've successfully deleted an user
+	    		if (User::deleteByUsername($username) > 0) {
 	            	$this->app->flash('info', "Sucessfully deleted '$username'");
 				} else {
 	            	$this->app->flash('info', "An error ocurred. Unable to delete user '$username'.");
