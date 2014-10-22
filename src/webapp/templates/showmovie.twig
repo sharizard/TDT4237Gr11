@@ -1,6 +1,7 @@
 {% extends 'base.twig' %}
 
 {% block content %}
+    <b>{{ flash.error|raw }}</b> <br />
 
     {% if movie %}
         <h2>{{ movie.name }}</h2>

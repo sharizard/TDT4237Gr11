@@ -57,8 +57,16 @@ class MovieController extends Controller {
                 $review->setAuthor($author);
                 $review->setText($text);
                 $review->setMovieId($id);
-                $review->save();
-                $this->app->flash('info', 'The review was successfully saved.');
+                $validationErrors = MovieReview::validate($author, $text);
+
+                if(sizeof($validationErrors) > 0) {
+                    $errors = join("<br>\n", $validationErrors);
+                    $this->app->flash('error', $errors);
+                }
+                else {
+                    $review->save();
+                    $this->app->flash('info', 'The review was successfully saved.');
+                }
             }
 
             $this->app->redirect('/movies/' . $id);
