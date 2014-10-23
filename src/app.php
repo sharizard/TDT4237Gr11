@@ -3,7 +3,7 @@
 
 $app = new \Slim\Slim([
     'templates.path' => __DIR__.'/webapp/templates/',
-    'debug' => true,
+    'debug' => false,
     'view' => new \Slim\Views\Twig()
 ]);
 

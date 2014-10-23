@@ -109,27 +109,24 @@ class UserController extends Controller {
 
         if ($this->app->request->isPost()) {
             $request = $this->app->request;
-            $email = $request->post('email');
-
-            $bio = filter_var($request->post('bio'), FILTER_SANITIZE_STRING);
-            $age = filter_var($request->post('age'), FILTER_SANITIZE_STRING);
-        
-            // Upload avatar if selected
-            if ($_FILES["avatar"]["error"] != 4) {
-                $user->upload($user->getUserName());
-            }
-            // Validate Email
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $this->app->flash('error', 'Invalid email');
-                return $this->app->redirect('edit');
-            }
-            
-            $user->setEmail($email);
-            $user->setBio($bio);
-            $user->setAge($age);
-            $token = $request->post('csrf_token');
+			$token = $request->post('csrf_token');
 
             if ($token == $_SESSION['csrf_token']) {
+				$email = $request->post('email');
+
+				$bio = filter_var($request->post('bio'), FILTER_SANITIZE_STRING);
+				$age = filter_var($request->post('age'), FILTER_SANITIZE_STRING);
+			
+				// Upload avatar if selected
+				if ($_FILES["avatar"]["error"] != 4) {
+					$user->upload($user->getUserName());
+				}
+				// Validate Email
+				if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+					$this->app->flash('error', 'Invalid email');
+					return $this->app->redirect('edit');
+				}
+			
                 $user->setEmail($email);
                 $user->setBio($bio);
                 $user->setAge($age);
