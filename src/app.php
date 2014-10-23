@@ -3,7 +3,7 @@
 
 $app = new \Slim\Slim([
     'templates.path' => __DIR__.'/webapp/templates/',
-    'debug' => true,
+    'debug' => false,
     'view' => new \Slim\Views\Twig()
 ]);
 
@@ -12,7 +12,8 @@ $view->parserExtensions = array(
     new \Slim\Views\TwigExtension(),
 );
 
-    $app->mail = new PHPMailer;
+    // Creates an instance to send emails
+//    $app->mail = new PHPMailer;
 
 try {
     // Create (connect to) SQLite database in file

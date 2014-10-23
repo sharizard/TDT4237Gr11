@@ -84,29 +84,29 @@ class LoginController extends Controller {
             }
         }
     }
-
-    function sendMail($to, $subject, $body) {
-        $this->app->mail->isSMTP();
-        $this->app->mail->CharSet = 'UTF-8';
-        $this->app->mail->Host = "smtp.gmail.com"; // SMTP server example
-        $this->app->mail->SMTPAuth = true;                  // enable SMTP authentication
-        $this->app->mail->Port = 587;                    // set the SMTP port for the GMAIL server
-        $this->app->mail->Username = "moviereviewsgr11@gmail.com"; // SMTP account username example
-        $this->app->mail->Password = "portalen";
-        $this->app->mail->FromName = 'moviereviewsgr11@gmail.com';
-        $this->app->mail->SMTPSecure = 'tls';
-        $this->app->mail->addAddress($to);
-        $this->app->mail->Subject = $subject;
-        $this->app->mail->Body = $body;
-
-        if (!$this->app->mail->send()) {
-            $this->app->flashNow('error', "Message could not be sent.");
-            $this->render('recover.twig', []);
-        } else {
-            $this->app->flashNow('info', "Email sent! Follow the email's description to reset password.");
-            $this->render('recover.twig', []);
-        }
-    }
+    // Used to send email
+//    function sendMail($to, $subject, $body) {
+//        $this->app->mail->isSMTP();
+//        $this->app->mail->CharSet = 'UTF-8';
+//        $this->app->mail->Host = "smtp.gmail.com"; // SMTP server example
+//        $this->app->mail->SMTPAuth = true;                  // enable SMTP authentication
+//        $this->app->mail->Port = 587;                    // set the SMTP port for the GMAIL server
+//        $this->app->mail->Username = "moviereviewsgr11@gmail.com"; // SMTP account username example
+//        $this->app->mail->Password = "portalen";
+//        $this->app->mail->FromName = 'moviereviewsgr11@gmail.com';
+//        $this->app->mail->SMTPSecure = 'tls';
+//        $this->app->mail->addAddress($to);
+//        $this->app->mail->Subject = $subject;
+//        $this->app->mail->Body = $body;
+//
+//        if (!$this->app->mail->send()) {
+//            $this->app->flashNow('error', "Message could not be sent.");
+//            $this->render('recover.twig', []);
+//        } else {
+//            $this->app->flashNow('info', "Email sent! Follow the email's description to reset password.");
+//            $this->render('recover.twig', []);
+//        }
+//    }
 
     // The recover view is two-fold. The first page contains the username and email field, whereas the second page is only displayed when redirected from URL.
     function recover() {
@@ -199,7 +199,10 @@ class LoginController extends Controller {
                         $body = "Change the URL to fit your local config. Click to reset password: http://localhost:8080/login/recover?reset=$code&username=$username";
                         $sql = $this->app->db->prepare("UPDATE users SET reset=?, timestamp=? WHERE user=?");
                         $sql->execute(array($code, $timestamp, $username));
-                        $this->sendMail($to, $subject, $body);
+                        
+                        echo "<a href='http://localhost:8080/login/recover?reset=$code&username=$username'>Click to reset password</a>";
+              
+//                        $this->sendMail($to, $subject, $body);
                     } else {
                         $this->app->flashNow('error', "Incorrect email");
                         $this->render('recover.twig', []);
