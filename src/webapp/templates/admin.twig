@@ -5,7 +5,7 @@
 <h2>Admin section</h2>
 
 {% if users %}
-    <table>
+<table>
     <tr>
         <th>Id</th>
         <th>Username</th>
@@ -15,16 +15,16 @@
             <td>{{ user.id|raw }}</td>
             <td><a href="/user/{{ user.username|raw }}">{{ user.username|raw }}</a></td>
             <td>
-            	<form action="/admin/delete/{{ user.username|raw }}" method="POST">
-            		<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-					<input type="submit" name="submit" value="Delete this user">
-            	</form>
+                <form action="/admin/delete/{{ user.username|raw }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="submit" name="submit" value="Delete this user">
+                </form>
             </td>
         </tr>
     {% endfor %}
-    </table>
+</table>
 {% else %}
-    The users table is empty.
+You are the only user left!
 {% endif %}
 
 {% endblock %}

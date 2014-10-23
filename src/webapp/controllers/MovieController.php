@@ -39,6 +39,7 @@ class MovieController extends Controller {
             $this->render('showmovie.twig', [
                 'movie' => Movie::find($id),
                 'reviews' => MovieReview::findByMovieId($id),
+                'username' => $_SESSION['user'],
                 'csrf_token' => $_SESSION['csrf_token']
             ]);
         }
@@ -48,16 +49,15 @@ class MovieController extends Controller {
         if (Auth::guest()) {
             $this->app->redirect('/login');
         } else {
-            $author = $this->app->request->post('author');
             $text = $this->app->request->post('text');
             $token = $this->app->request->post('csrf_token');
 
             if ($token == $_SESSION['csrf_token']) {
                 $review = MovieReview::makeEmpty();
-                $review->setAuthor($author);
+                $review->setAuthor($_SESSION['user']);
                 $review->setText($text);
                 $review->setMovieId($id);
-                $validationErrors = MovieReview::validate($author, $text);
+                $validationErrors = MovieReview::validate($text);
 
                 if(sizeof($validationErrors) > 0) {
                     $errors = join("<br>\n", $validationErrors);

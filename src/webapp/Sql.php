@@ -38,7 +38,7 @@ class Sql {
     static function insertDummyUsers() {
         $salt1 = Hash::createSalt();
         $pass1 = Hash::make(bin2hex(openssl_random_pseudo_bytes(2)), $salt1);
-        $pass2 = 'bobdylan';
+        $pass2 = 'p@$$0Rd';
         $salt2 = Hash::createSalt();
         $salted_pass2 = Hash::make($pass2, $salt2);
         $pass3 = 'liverpool';
@@ -46,7 +46,7 @@ class Sql {
         $salted_pass3 = Hash::make($pass3, $salt3);
 
         $q1 = "INSERT INTO users(user, salt, pass, isadmin) VALUES ('admin', '$salt1', '$pass1', 1)";
-        $q2 = "INSERT INTO users(user, salt, pass, isadmin) VALUES ('bob', '$salt2', '$salted_pass2', 1)";
+        $q2 = "INSERT INTO users(user, salt, pass, i) VALUES ('bob', '$salt2', '$salted_pass2', 1)";
         $q3 = "INSERT INTO users(user, salt, pass) VALUES ('mike', '$salt3', '$salted_pass3')";
 
         self::$pdo->exec($q1);

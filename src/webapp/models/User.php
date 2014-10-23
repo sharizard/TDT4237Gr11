@@ -197,7 +197,7 @@ class User extends Avatar {
         }
 
         if (!$symbol) {
-            array_push($validationErrors, "Password must contain a special character! Special characters allowed: ! @ # $ % *");
+            array_push($validationErrors, "Password must contain a special character!");
         }
 
         return $validationErrors;
