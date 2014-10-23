@@ -81,6 +81,22 @@ class MovieReview
         return new MovieReview();
     }
 
+    static function validate($author, $text) {
+        $validationErrors = [];
+        $empty = 0;
+
+        if (strlen($author) <= $empty) {
+            array_push($validationErrors, "Authorfield can't be empty!");
+        }
+
+        if (strlen($text) <= $empty) {
+            array_push($validationErrors, "Textfield can't be empty!");
+        }
+
+        return $validationErrors;
+
+    }
+
     /**
      * Fetch all movie reviews by movie id.
      */

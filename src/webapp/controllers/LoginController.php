@@ -30,6 +30,7 @@ class LoginController extends Controller {
     }
 
     function login() {
+    
         if ($this->app->request->post('token') !== null) {
             $request = $this->app->request;
             $user = $request->post('user');
@@ -39,48 +40,53 @@ class LoginController extends Controller {
             if ($token == $_SESSION['csrf_token']) {
                 $ip = $_SERVER['REMOTE_ADDR'];
 
-                if (Auth::checkCredentials($user, $pass)) {
-                    $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
-                    $q->execute(array($ip));
+				$q = $this->app->db->prepare("SELECT * FROM failed_logins WHERE ip_address=? AND ?-timestamp < 15");
+                $q->execute(array($ip, time()));
+                $result = $q->fetchAll();
+                
+                $failed = count($result);
+                
+                if ($failed > 3) {
+                    $this->app->flashNow('error', "Too many failed attempts. Wait 15 seconds and try again.");
+                }
 
-                    // Regenerate session id and clear session array
-                    session_regenerate_id();
-                    $_SESSION = array();
-                    $_SESSION['user'] = $user;
-                    $isAdmin = Auth::user()->isAdmin();
+                else {
+                
+                	if (Auth::checkCredentials($user, $pass)) {
+	                    $q = $this->app->db->prepare("DELETE FROM failed_logins WHERE ip_address = ?");
+	                    $q->execute(array($ip));
+	
+	                    // Regenerate session id and clear session array
+	                    session_regenerate_id();
+	                    $_SESSION = array();
+	                    $_SESSION['user'] = $user;
+	                    $isAdmin = Auth::user()->isAdmin();
+	
+	                    if ($isAdmin) {
+	                        setcookie("isadmin", "yes");
+	                    } else {
+	                        setcookie("isadmin", "no");
+	                    }
+	
+	                    $this->app->flash('info', "You are now successfully logged in as $user.");
+	                    $this->app->redirect('/');
+	                }
+	                
+	                else {
+	                
+	                	$q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address, timestamp) VALUES (?, ?)");
+						$q->execute(array($ip, time()));
 
-                    if ($isAdmin) {
-                        setcookie("isadmin", "yes");
-                    } else {
-                        setcookie("isadmin", "no");
-                    }
+	                    $this->app->flashNow('error', 'Incorrect user/pass combination.');
 
-                    $this->app->flash('info', "You are now successfully logged in as $user.");
-                    $this->app->redirect('/');
-                } else {
-
-                    $q = $this->app->db->prepare("SELECT times_failed FROM failed_logins WHERE ip_address=?");
-                    $q->execute(array($ip));
-                    $result = $q->fetch(PDO::FETCH_NUM);
-                    $delay = $result[0];
-
-                    if ($delay == 0) {
-                        $q = $this->app->db->prepare("INSERT INTO failed_logins(ip_address, times_failed) VALUES (?, 1)");
-                        $q->execute(array($ip));
-                    } else {
-                        $q = $this->app->db->prepare("UPDATE failed_logins SET times_failed=times_failed+1 WHERE ip_address = ?");
-                        $q->execute(array($ip));
-                    }
-
-                    sleep($delay);
-                    $this->app->flashNow('error', 'Incorrect user/pass combination.');
-
-                    // Create token and pass it to the rendered template
+					}
+                }
+                
+                // Create token and pass it to the rendered template
                     $_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
                     $this->render('login.twig', [
                         'csrf_token' => $_SESSION['csrf_token']
                     ]);
-                }
             }
         }
     }
