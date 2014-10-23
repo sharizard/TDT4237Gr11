@@ -148,6 +148,7 @@ class User extends Avatar {
 
         $uppercase = preg_match('@[A-Z]@', $pass);
         $number = preg_match('@[0-9]@', $pass);
+        $symbol = preg_match('@[\W]@', $pass);
 
         if (strlen($user->user) > self::MAX_USER_LENGTH) {
             array_push($validationErrors, "Username too long. Max length is " . self::MAX_USER_LENGTH);
@@ -165,6 +166,10 @@ class User extends Avatar {
             array_push($validationErrors, "Password must contain at least one number!");
         }
 
+        if (!$symbol) {
+            array_push($validationErrors, "Password must contain a special character!");
+        }
+
         if (preg_match('/^[A-Za-z0-9_]+$/', $user->user) === 0) {
             array_push($validationErrors, 'Username can only contain letters and numbers');
         }
@@ -177,6 +182,7 @@ class User extends Avatar {
 
         $uppercase = preg_match('@[A-Z]@', $pass);
         $number = preg_match('@[0-9]@', $pass);
+        $symbol = preg_match('@[\W]@', $pass);
 
         if (strlen($pass) < self::MIN_PASSWORD_LENGTH) {
             array_push($validationErrors, "Password is too short. Minimum length is " . self::MIN_PASSWORD_LENGTH);
@@ -188,6 +194,10 @@ class User extends Avatar {
 
         if (!$number) {
             array_push($validationErrors, "Password must contain at least one number!");
+        }
+
+        if (!$symbol) {
+            array_push($validationErrors, "Password must contain a special character! Special characters allowed: ! @ # $ % *");
         }
 
         return $validationErrors;
