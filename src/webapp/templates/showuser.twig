@@ -23,12 +23,12 @@
             <td>{{ user.id|escape }}</td>
             <td>{{ user.username|escape }}</td>
             <td>{{ user.email|escape }}</td>
-            <td>{{ user.bio|escape }}</td>
+            <td>{{ user.bio|escape('js') }}</td>
             <td>{{ user.age|escape }}</td>
         </tr>
     </table>
 {% else %}
-    Could not find a user with username "{{ username|escape }}".
+    Could not find a user with username "{{ username|escape('js') }}".
 {% endif %}
 
 {% endblock %}

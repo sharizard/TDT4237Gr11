@@ -12,7 +12,8 @@ class IndexController extends Controller {
 
     function index() {
         $request = $this->app->request;
-        $msg = $request->get('msg');
+        //$msg = $request->get('msg');
+        $msg = filter_var($request->get('msg'), FILTER_SANITIZE_STRING);
         $variables = [];
 
         if ($msg) {
