@@ -25,6 +25,8 @@ try {
     exit();
 }
 
+chmod(__DIR__ . '/../web/images/avatars', 0700);
+
 $ns ='tdt4237\\webapp\\controllers\\'; 
 
 // Home page at http://localhost/
